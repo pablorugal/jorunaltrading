@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<!-- saved from url=(0050)file:///Users/pablo/Downloads/trading-journal.html -->
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trading Journal</title>
+<script src="./index_files/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d0d0d;color:#e0e0e0}
+.app{display:flex;height:100vh}
+.sidebar{width:210px;min-width:210px;background:#111;border-right:1px solid #1e1e1e;display:flex;flex-direction:column;padding:20px 0;overflow-y:auto}
+.logo{padding:0 18px 24px;font-size:11px;font-weight:600;color:#444;letter-spacing:0.12em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 18px;cursor:pointer;font-size:13px;color:#666;transition:all 0.15s;border-left:2px solid transparent;user-select:none}
+.nav-item:hover{color:#ccc;background:#161616}
+.nav-item.active{color:#7ecb9e;border-left-color:#7ecb9e;background:#161616}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.5}
+.sidebar-footer{margin-top:auto;padding:16px 18px;display:flex;gap:8px}
+.main{flex:1;overflow-y:auto;padding:32px 36px;background:#0d0d0d}
+.page{display:none}
+.page.active{display:block}
+.page-title{font-size:18px;font-weight:500;color:#e0e0e0;margin-bottom:4px}
+.page-sub{font-size:13px;color:#444;margin-bottom:24px}
+.card{background:#141414;border:1px solid #1e1e1e;border-radius:10px;padding:22px}
+.card+.card,.card+div>.card{margin-top:16px}
+.card-label{font-size:11px;font-weight:600;color:#444;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+label.lbl{font-size:12px;color:#555;display:block;margin-bottom:5px}
+input[type=text],input[type=number],input[type=date],select,textarea{width:100%;background:#1a1a1a;border:1px solid #222;border-radius:6px;color:#d0d0d0;font-size:13px;padding:8px 11px;font-family:inherit;outline:none;transition:border 0.15s;appearance:none}
+input:focus,select:focus,textarea:focus{border-color:#333}
+select{cursor:pointer}
+textarea{resize:vertical;line-height:1.6}
+input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
+.btn{background:#7ecb9e;color:#0a1f12;border:none;border-radius:6px;padding:9px 20px;font-size:13px;font-weight:600;cursor:pointer;transition:opacity 0.15s;font-family:inherit}
+.btn:hover{opacity:0.85}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn-ghost{background:transparent;border:1px solid #222;color:#666;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.btn-ghost:hover{border-color:#333;color:#aaa}
+.btn-ghost.danger{color:#c96060;border-color:#3a1a1a}
+.btn-ghost.danger:hover{background:#1a0a0a}
+.metric{background:#141414;border:1px solid #1e1e1e;border-radius:8px;padding:14px 16px}
+.metric-label{font-size:11px;color:#444;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.06em}
+.metric-val{font-size:22px;font-weight:500;color:#e0e0e0}
+.metric-val.green{color:#7ecb9e}
+.metric-val.red{color:#c96060}
+.metric-val.amber{color:#c8973a}
+.tag{display:inline-block;font-size:11px;padding:3px 9px;border-radius:4px;background:#1a1a1a;border:1px solid #222;color:#666;margin:2px}
+.tag.pos{background:#0a1f12;border-color:#1a4d28;color:#7ecb9e}
+.tag.neg{background:#1f0a0a;border-color:#4d1a1a;color:#c96060}
+.tag.neu{background:#1f1a0a;border-color:#4d3a1a;color:#c8973a}
+.sep{height:1px;background:#1a1a1a;margin:18px 0}
+.radio-group{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.radio-opt{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#666;padding:7px 12px;border:1px solid #222;border-radius:6px;transition:all 0.15s;user-select:none}
+.radio-opt:hover{border-color:#333;color:#bbb}
+.radio-opt.selected{border-color:#7ecb9e;color:#7ecb9e;background:#0a1f12}
+.radio-opt.selected-red{border-color:#c96060;color:#c96060;background:#1f0a0a}
+.multi-opt{cursor:pointer;font-size:13px;color:#666;padding:6px 12px;border:1px solid #222;border-radius:6px;transition:all 0.15s;user-select:none;margin:3px}
+.multi-opt:hover{border-color:#333;color:#bbb}
+.multi-opt.selected{border-color:#7ecb9e;color:#7ecb9e;background:#0a1f12}
+.section-head{font-size:11px;font-weight:600;color:#444;text-transform:uppercase;letter-spacing:0.1em;margin:20px 0 12px}
+.section-head:first-child{margin-top:0}
+.checklist-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #1a1a1a;font-size:13px;color:#777}
+.checklist-item:last-child{border:none}
+.checklist-item input[type=checkbox]{width:15px;height:15px;accent-color:#7ecb9e;flex-shrink:0;cursor:pointer}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #1a1a1a;font-size:13px}
+.stat-row:last-child{border:none}
+.stat-label{color:#555}
+.stat-val{color:#aaa;font-weight:500}
+.alert-box{background:#1a1208;border:1px solid #4d3a12;border-radius:8px;padding:12px 16px;font-size:12px;color:#c8973a;line-height:1.6;margin-bottom:18px}
+.trade-table{width:100%;border-collapse:collapse}
+.trade-table th{font-size:11px;color:#444;text-transform:uppercase;letter-spacing:0.06em;padding:8px 10px;text-align:left;border-bottom:1px solid #1a1a1a;white-space:nowrap}
+.trade-table td{font-size:12px;color:#777;padding:9px 10px;border-bottom:1px solid #141414}
+.trade-table tr:hover td{background:#161616}
+.badge{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600}
+.badge.tp{background:#0a1f12;color:#7ecb9e}
+.badge.sl{background:#1f0a0a;color:#c96060}
+.badge.be{background:#1a1a0a;color:#c8973a}
+.badge.nop{background:#1a1a1a;color:#555}
+.r-display{background:#1a1a1a;border:1px solid #222;border-radius:6px;padding:8px 11px;font-size:15px;font-weight:600;color:#7ecb9e;min-height:36px;display:flex;align-items:center}
+.hint{font-size:11px;color:#3a3a3a;margin-top:5px;line-height:1.5}
+.toast{position:fixed;bottom:24px;right:24px;background:#1a2e1f;border:1px solid #2d5a3a;color:#7ecb9e;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none}
+.toast.show{opacity:1}
+.empty-state{font-size:13px;color:#333;padding:16px 0;text-align:center}
+.row-flex{display:flex;gap:12px;align-items:flex-end}
+.row-flex>*{flex:1}
+.history-item{padding:12px 0;border-bottom:1px solid #1a1a1a}
+.history-item:last-child{border:none}
+.history-item .h-title{font-size:13px;color:#aaa;font-weight:500;margin-bottom:3px}
+.history-item .h-sub{font-size:12px;color:#444}
+.pattern-item{padding:12px;background:#1a1a1a;border-radius:8px;margin-bottom:8px}
+.pattern-item .p-id{font-size:11px;font-weight:600;color:#7ecb9e;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.pattern-item .p-trigger{font-size:12px;color:#666;margin-bottom:3px}
+.pattern-item .p-lang{font-size:11px;color:#3a3a3a;font-style:italic}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="logo">Trading Journal</div>
+    <div class="nav-item" onclick="nav(&#39;dashboard&#39;)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>
+      Dashboard
+    </div>
+    <div class="nav-item" onclick="nav(&#39;plan&#39;)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+      Plan semanal
+    </div>
+    <div class="nav-item active" onclick="nav(&#39;checkin&#39;)">
+      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path></svg>
+      Check-in diario
+    </div>
+    <div class="nav-item" onclick="nav(&#39;trades&#39;)">
+      <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+      Trades
+    </div>
+    <div class="nav-item" onclick="nav(&#39;emocional&#39;)">
+      <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"></path></svg>
+      Diario emocional
+    </div>
+    <div class="nav-item" onclick="nav(&#39;patrones&#39;)">
+      <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 014-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 01-4 4H3"></path></svg>
+      Patrones
+    </div>
+    <div class="nav-item" onclick="nav(&#39;protocolos&#39;)">
+      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+      Protocolos
+    </div>
+    <div class="nav-item" onclick="nav(&#39;evolucion&#39;)">
+      <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+      Evolución
+    </div>
+    <div class="nav-item" onclick="nav(&#39;creencias&#39;)">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      Identidad
+    </div>
+    <div class="sidebar-footer">
+      <button class="btn-ghost btn-sm" onclick="exportData()">Exportar</button>
+      <button class="btn-ghost btn-sm" onclick="document.getElementById(&#39;import-input&#39;).click()">Importar</button>
+      <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page" id="page-dashboard">
+      <div class="page-title">Dashboard</div>
+      <div class="page-sub" id="dash-sub">Resumen de proceso y trading</div>
+      <div class="grid4" style="margin-bottom:14px">
+        <div class="metric"><div class="metric-label">Check-ins</div><div class="metric-val" id="d-checkins">0</div></div>
+        <div class="metric"><div class="metric-label">Siguiendo plan</div><div class="metric-val green" id="d-plan">—</div></div>
+        <div class="metric"><div class="metric-label">Sin romper normas</div><div class="metric-val green" id="d-normas">—</div></div>
+        <div class="metric"><div class="metric-label">Riesgo cumplido</div><div class="metric-val green" id="d-riesgo">—</div></div>
+      </div>
+      <div class="grid4" style="margin-bottom:14px">
+        <div class="metric"><div class="metric-label">P&amp;L en R</div><div class="metric-val green" id="d-pnlr">+0.00R</div></div>
+        <div class="metric"><div class="metric-label">Win rate</div><div class="metric-val" id="d-wr">—</div></div>
+        <div class="metric"><div class="metric-label">Profit factor</div><div class="metric-val" id="d-pf">—</div></div>
+        <div class="metric"><div class="metric-label">Expectancia</div><div class="metric-val" id="d-exp">—</div></div>
+      </div>
+      <div class="grid2" style="margin-bottom:14px">
+        <div class="card">
+          <div class="card-label">Resultados</div>
+          <div id="d-results" style="margin-bottom:12px"><span class="tag pos">0 TP</span><span class="tag neg">0 SL</span><span class="tag neu">0 BE</span><span class="tag">0 No operé</span></div>
+          <div class="card-label">Síntomas emocionales</div>
+          <div id="d-sintomas"><span class="tag pos">0 Positivos</span><span class="tag neu">0 Matiz</span><span class="tag neg">0 Negativos</span></div>
+        </div>
+        <div class="card">
+          <div class="card-label">Detector de patrones</div>
+          <div id="d-detector" style="font-size:12px;color:#333;line-height:1.8">Registra al menos 5 trades para activar el detector automático.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-label">Curva de capital en R</div>
+        <canvas id="equity-chart" height="826" width="2254" style="display: block; box-sizing: border-box; height: 413px; width: 1127px;"></canvas>
+      </div>
+    </div>
+
+    <!-- PLAN SEMANAL -->
+    <div class="page" id="page-plan">
+      <div class="page-title">Plan semanal</div>
+      <div class="page-sub">Complétalo cada domingo antes de la semana</div>
+      <div class="card">
+        <div class="grid2">
+          <div class="field"><label class="lbl">Semana</label><input type="text" id="p-semana" placeholder="Semana 01 — Junio 2026"></div>
+          <div class="field"><label class="lbl">Sesgo de mercado</label><input type="text" id="p-sesgo" placeholder="Ej. Alcista en NQ, bajista en DXY"></div>
+        </div>
+        <div class="field"><label class="lbl">Reglas activas esta semana</label><textarea id="p-reglas" rows="2" placeholder="Reglas específicas que te autoimpones..."></textarea></div>
+        <div class="grid2">
+          <div class="field"><label class="lbl">Reto psicológico (La Senda)</label><input type="text" id="p-reto" placeholder="Ej. Inventario del Tilt, Medir en R"></div>
+          <div class="field"><label class="lbl">Marco teórico / lectura</label><input type="text" id="p-marco" placeholder="Ej. Tendler, cap. 4"></div>
+        </div>
+        <div class="field"><label class="lbl">Compromiso no negociable</label><textarea id="p-compromiso" rows="2" placeholder="Conducta de proceso que define el éxito semanal, independiente del P&amp;L"></textarea></div>
+        <div style="display:flex;align-items:center;gap:16px;margin-top:6px">
+          <button class="btn" onclick="savePlan()">Guardar semana</button>
+          <div style="display:flex;align-items:center;gap:10px;margin-left:auto">
+            <span style="font-size:12px;color:#555">¿Cumplido al cierre?</span>
+            <div class="radio-group" style="margin-top:0">
+              <div class="radio-opt" id="rp-si" onclick="selectRadio(&#39;plan-cumplido&#39;,&#39;si&#39;,&#39;rp-si&#39;,&#39;rp-no&#39;)">Sí</div>
+              <div class="radio-opt" id="rp-no" onclick="selectRadio(&#39;plan-cumplido&#39;,&#39;no&#39;,&#39;rp-no&#39;,&#39;rp-si&#39;)">No</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card" id="plan-history-card" style="display:none">
+        <div class="card-label">Semanas anteriores</div>
+        <div id="plan-history"></div>
+      </div>
+    </div>
+
+    <!-- CHECK-IN DIARIO -->
+    <div class="page active" id="page-checkin">
+      <div class="page-title">Check-in diario</div>
+      <div class="page-sub">Pre-mercado: 5 minutos antes de abrir la plataforma</div>
+      <div class="card">
+        <div class="section-head">Pre-mercado</div>
+        <div class="grid2" style="margin-bottom:14px">
+          <div class="field"><label class="lbl">Fecha</label><input type="date" id="ci-fecha"></div>
+          <div class="field">
+            <label class="lbl">Nivel de presencia — <span id="ci-presencia-val">5</span>/10</label>
+            <input type="range" min="1" max="10" value="5" id="ci-presencia" oninput="document.getElementById(&#39;ci-presencia-val&#39;).textContent=this.value">
+            <div class="hint">1 = piloto automático · 10 = presencia plena</div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">Carga corporal detectada (puedes seleccionar varias)</label>
+          <div style="margin-top:6px;display:flex;flex-wrap:wrap">
+            <div class="multi-opt" onclick="toggleMulti(this,&#39;carga&#39;)">Mandíbula apretada</div>
+            <div class="multi-opt" onclick="toggleMulti(this,&#39;carga&#39;)">Hombros tensos</div>
+            <div class="multi-opt" onclick="toggleMulti(this,&#39;carga&#39;)">Respiración superficial</div>
+            <div class="multi-opt" onclick="toggleMulti(this,&#39;carga&#39;)">Calor en el pecho</div>
+            <div class="multi-opt" onclick="toggleMulti(this,&#39;carga&#39;)">Urgencia en los dedos</div>
+            <div class="multi-opt" onclick="toggleMulti(this,&#39;carga&#39;)">Suelto y relajado</div>
+          </div>
+        </div>
+        <div class="grid2" style="margin-bottom:14px">
+          <div class="field"><label class="lbl">Emoción dominante</label>
+            <select id="ci-emocion"><option value="">— selecciona —</option><option>Calma</option><option>Ansiedad</option><option>Frustración</option><option>Urgencia</option><option>Euforia</option><option>Miedo</option><option>Aburrimiento</option><option>Neutro</option></select>
+          </div>
+          <div class="field"><label class="lbl">Necesidad oculta</label>
+            <select id="ci-necesidad"><option value="">— selecciona —</option><option>Ninguna</option><option>Recuperar dinero</option><option>Demostrar valía</option><option>Acertar la dirección</option><option>Compensar inactividad</option></select>
+          </div>
+        </div>
+        <div class="field"><label class="lbl">Narrativa interna — ¿qué historia me estoy contando hoy?</label><textarea id="ci-narrativa" rows="2" placeholder="Escribe libremente..."></textarea></div>
+        <div class="grid2" style="margin-bottom:14px">
+          <div class="field"><label class="lbl">Frase ancla</label><input type="text" id="ci-ancla" placeholder="Lo más importante que no debo perder de vista hoy"></div>
+          <div class="field"><label class="lbl">Riesgo de autosabotaje hoy</label><input type="text" id="ci-sombra" placeholder="Ej. Revancha si encadeno dos SL"></div>
+        </div>
+        <div class="field"><label class="lbl">Compromiso de sesión</label><input type="text" id="ci-compromiso" placeholder="Conducta no negociable de hoy"></div>
+
+        <div class="sep"></div>
+        <div class="section-head">Post-mercado</div>
+        <div class="grid2" style="margin-bottom:14px">
+          <div class="field"><label class="lbl">¿Siguió el plan?</label>
+            <div class="radio-group"><div class="radio-opt" id="ci-plan-si" onclick="selectRadio(&#39;ci-plan&#39;,&#39;si&#39;,&#39;ci-plan-si&#39;,&#39;ci-plan-no&#39;)">Sí</div><div class="radio-opt" id="ci-plan-no" onclick="selectRadio(&#39;ci-plan&#39;,&#39;no&#39;,&#39;ci-plan-no&#39;,&#39;ci-plan-si&#39;)">No</div></div>
+          </div>
+          <div class="field"><label class="lbl">¿Rompió norma?</label>
+            <div class="radio-group"><div class="radio-opt" id="ci-norma-si" onclick="selectRadio(&#39;ci-norma&#39;,&#39;si&#39;,&#39;ci-norma-si&#39;,&#39;ci-norma-no&#39;)">Sí</div><div class="radio-opt" id="ci-norma-no" onclick="selectRadio(&#39;ci-norma&#39;,&#39;no&#39;,&#39;ci-norma-no&#39;,&#39;ci-norma-si&#39;)">No</div></div>
+          </div>
+          <div class="field"><label class="lbl">¿Riesgo cumplido?</label>
+            <div class="radio-group"><div class="radio-opt" id="ci-riesgo-si" onclick="selectRadio(&#39;ci-riesgo&#39;,&#39;si&#39;,&#39;ci-riesgo-si&#39;,&#39;ci-riesgo-no&#39;)">Sí</div><div class="radio-opt" id="ci-riesgo-no" onclick="selectRadio(&#39;ci-riesgo&#39;,&#39;no&#39;,&#39;ci-riesgo-no&#39;,&#39;ci-riesgo-si&#39;)">No</div></div>
+          </div>
+          <div class="field"><label class="lbl">Resultado de sesión</label>
+            <select id="ci-resultado"><option value="">— selecciona —</option><option>TP</option><option>SL</option><option>BE</option><option>No operé</option></select>
+          </div>
+        </div>
+        <div class="field"><label class="lbl">Síntoma de sesión</label>
+          <div class="radio-group"><div class="radio-opt" id="ci-sint-pos" onclick="selectRadio(&#39;ci-sintoma&#39;,&#39;pos&#39;,&#39;ci-sint-pos&#39;,&#39;ci-sint-mat&#39;,&#39;ci-sint-neg&#39;)">Positivo</div><div class="radio-opt" id="ci-sint-mat" onclick="selectRadio(&#39;ci-sintoma&#39;,&#39;mat&#39;,&#39;ci-sint-mat&#39;,&#39;ci-sint-pos&#39;,&#39;ci-sint-neg&#39;)">Matiz</div><div class="radio-opt" id="ci-sint-neg" onclick="selectRadio(&#39;ci-sintoma&#39;,&#39;neg&#39;,&#39;ci-sint-neg&#39;,&#39;ci-sint-pos&#39;,&#39;ci-sint-mat&#39;)">Negativo</div></div>
+        </div>
+        <div style="margin-top:16px"><button class="btn" onclick="saveCheckin()">Guardar check-in</button></div>
+      </div>
+    </div>
+
+    <!-- TRADES -->
+    <div class="page" id="page-trades">
+      <div class="page-title">Trades</div>
+      <div class="page-sub">Registra en R — el dinero nominal activa el sistema límbico</div>
+      <div class="card">
+        <div class="grid3" style="margin-bottom:14px">
+          <div class="field"><label class="lbl">Fecha</label><input type="date" id="tr-fecha"></div>
+          <div class="field"><label class="lbl">Activo</label><input type="text" id="tr-activo" placeholder="EURUSD, NQ, AAPL..."></div>
+          <div class="field"><label class="lbl">Mercado</label>
+            <select id="tr-mercado"><option value="">— selecciona —</option><option>Forex</option><option>Índices</option><option>Acciones</option></select>
+          </div>
+        </div>
+        <div class="grid3" style="margin-bottom:14px">
+          <div class="field"><label class="lbl">Dirección</label>
+            <div class="radio-group"><div class="radio-opt" id="tr-buy" onclick="selectRadio(&#39;tr-tipo&#39;,&#39;buy&#39;,&#39;tr-buy&#39;,&#39;tr-sell&#39;)">Buy</div><div class="radio-opt" id="tr-sell" onclick="selectRadio(&#39;tr-tipo&#39;,&#39;sell&#39;,&#39;tr-sell&#39;,&#39;tr-buy&#39;)">Sell</div></div>
+          </div>
+          <div class="field"><label class="lbl">Precio entrada</label><input type="number" id="tr-entrada" placeholder="0.00" step="0.0001"></div>
+          <div class="field"><label class="lbl">Precio salida</label><input type="number" id="tr-salida" placeholder="0.00" step="0.0001"></div>
+        </div>
+        <div class="grid3" style="margin-bottom:14px">
+          <div class="field"><label class="lbl">Riesgo inicial (€) = 1R</label><input type="number" id="tr-riesgo" placeholder="Ej. 50" oninput="calcR()"></div>
+          <div class="field"><label class="lbl">Resultado nominal (€)</label><input type="number" id="tr-nominal" placeholder="Ej. 125 o -50" oninput="calcR()"></div>
+          <div class="field"><label class="lbl">Resultado en R</label><div class="r-display" id="tr-r-display">—</div></div>
+        </div>
+        <div class="grid2" style="margin-bottom:14px">
+          <div class="field"><label class="lbl">Resultado técnico</label>
+            <select id="tr-tecnico"><option value="">— selecciona —</option><option>TP</option><option>SL</option><option>BE</option><option>No operé</option></select>
+          </div>
+          <div class="field"><label class="lbl">Síntoma emocional</label>
+            <div class="radio-group"><div class="radio-opt" id="ts-pos" onclick="selectRadio(&#39;ts&#39;,&#39;pos&#39;,&#39;ts-pos&#39;,&#39;ts-mat&#39;,&#39;ts-neg&#39;)">Positivo</div><div class="radio-opt" id="ts-mat" onclick="selectRadio(&#39;ts&#39;,&#39;mat&#39;,&#39;ts-mat&#39;,&#39;ts-pos&#39;,&#39;ts-neg&#39;)">Matiz</div><div class="radio-opt" id="ts-neg" onclick="selectRadio(&#39;ts&#39;,&#39;neg&#39;,&#39;ts-neg&#39;,&#39;ts-pos&#39;,&#39;ts-mat&#39;)">Negativo</div></div>
+          </div>
+        </div>
+        <div class="grid2" style="margin-bottom:14px">
+          <div class="field"><label class="lbl">Tag emocional</label>
+            <select id="tr-tag"><option value="">— selecciona —</option><option>Calma</option><option>Paciencia</option><option>FOMO</option><option>Revancha</option><option>Impaciencia</option><option>Sobreconfianza</option><option>Miedo a perder</option><option>Otro</option></select>
+          </div>
+          <div class="field"><label class="lbl">Tipo de tilt</label>
+            <select id="tr-tilt"><option value="">— selecciona —</option><option>Ninguno</option><option>Tilt de Pérdida</option><option>Tilt de Ganancia</option><option>Tilt de Injusticia</option><option>Tilt de Expectativa</option></select>
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">Checklist — ¿cumplió las reglas antes del clic?</label>
+          <div style="margin-top:8px">
+            <div class="checklist-item"><input type="checkbox" id="ck1"><label for="ck1" style="font-size:13px;color:#777;cursor:pointer;margin:0">Setup confirmado según plan</label></div>
+            <div class="checklist-item"><input type="checkbox" id="ck2"><label for="ck2" style="font-size:13px;color:#777;cursor:pointer;margin:0">Riesgo calculado antes de entrar</label></div>
+            <div class="checklist-item"><input type="checkbox" id="ck3"><label for="ck3" style="font-size:13px;color:#777;cursor:pointer;margin:0">Stop y target definidos desde el inicio</label></div>
+            <div class="checklist-item"><input type="checkbox" id="ck4"><label for="ck4" style="font-size:13px;color:#777;cursor:pointer;margin:0">Sin necesidad oculta activa</label></div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">Umbral de incomodidad (Steve Ward) — si esta op llega a -1R, ¿puedo mantener la calidad de mis decisiones en la siguiente?</label>
+          <div class="radio-group"><div class="radio-opt" id="umb-si" onclick="selectRadio(&#39;umbral&#39;,&#39;si&#39;,&#39;umb-si&#39;,&#39;umb-no&#39;)">Sí</div><div class="radio-opt" id="umb-no" onclick="selectRadio(&#39;umbral&#39;,&#39;no&#39;,&#39;umb-no&#39;,&#39;umb-si&#39;)">No → reconsiderar tamaño</div></div>
+        </div>
+        <div class="field"><label class="lbl">Notas</label><textarea id="tr-notas" rows="2" placeholder="Contexto, observaciones..."></textarea></div>
+        <button class="btn" onclick="saveTrade()">Registrar trade</button>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-label">Historial</div>
+        <div style="overflow-x:auto">
+          <table class="trade-table">
+            <thead><tr><th>Fecha</th><th>Activo</th><th>Dir</th><th>Resultado</th><th>R</th><th>Tag</th><th>Tilt</th><th>Síntoma</th></tr></thead>
+            <tbody id="trades-list"><tr><td colspan="8" class="empty-state">Sin trades registrados</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIARIO EMOCIONAL -->
+    <div class="page" id="page-emocional">
+      <div class="page-title">Diario emocional</div>
+      <div class="page-sub">Registro forense del comportamiento — en caliente y post-sesión</div>
+      <div class="card">
+        <div class="section-head">Etiqueta en caliente</div>
+        <div class="hint" style="margin-bottom:12px">El micro-espacio de 2-3 segundos durante la sesión: observa antes de actuar</div>
+        <div class="grid3" style="margin-bottom:14px">
+          <div class="field"><label class="lbl">Trigger — ¿qué pasó fuera?</label><input type="text" id="de-trigger" placeholder="Ej. Vela que salió sin mí"></div>
+          <div class="field"><label class="lbl">Emoción surgida</label><input type="text" id="de-emocion" placeholder="Ej. Urgencia, pánico"></div>
+          <div class="field"><label class="lbl">Impulso generado</label><input type="text" id="de-impulso" placeholder="Ej. Entrar sin setup"></div>
+        </div>
+        <div class="sep"></div>
+        <div class="section-head">Secuencia del día</div>
+        <div class="hint" style="margin-bottom:12px">Reconstruye un momento relevante eslabón por eslabón</div>
+        <div class="grid2" style="margin-bottom:14px">
+          <div class="field"><label class="lbl">Contexto (mercado)</label><textarea id="de-contexto" rows="2" placeholder="Qué pasaba en el mercado..."></textarea></div>
+          <div class="field"><label class="lbl">Pensamiento automático</label><input type="text" id="de-pensamiento" placeholder="Ej. «El mercado me la ha jugado otra vez»"></div>
+        </div>
+        <div class="grid2" style="margin-bottom:14px">
+          <div class="field"><label class="lbl">Conducta realizada</label><input type="text" id="de-conducta" placeholder="Ej. Moví el stop loss"></div>
+          <div class="field"><label class="lbl">Punto palanca — ¿dónde intervengo la próxima vez?</label><input type="text" id="de-palanca" placeholder="Ej. En el pensamiento automático"></div>
+        </div>
+        <div class="grid2" style="margin-bottom:14px">
+          <div class="field"><label class="lbl">Filtro — ¿gestión real o búsqueda de alivio emocional?</label>
+            <div class="radio-group"><div class="radio-opt" id="de-g" onclick="selectRadio(&#39;de-filtro&#39;,&#39;gestion&#39;,&#39;de-g&#39;,&#39;de-a&#39;,&#39;de-n&#39;)">Gestión real</div><div class="radio-opt" id="de-a" onclick="selectRadio(&#39;de-filtro&#39;,&#39;alivio&#39;,&#39;de-a&#39;,&#39;de-g&#39;,&#39;de-n&#39;)">Alivio emocional</div><div class="radio-opt" id="de-n" onclick="selectRadio(&#39;de-filtro&#39;,&#39;na&#39;,&#39;de-n&#39;,&#39;de-g&#39;,&#39;de-a&#39;)">No aplica</div></div>
+          </div>
+          <div class="field"><label class="lbl">Tipo de tilt</label>
+            <select id="de-tilt"><option value="">— selecciona —</option><option>Ninguno</option><option>Tilt de Pérdida</option><option>Tilt de Ganancia</option><option>Tilt de Injusticia</option><option>Tilt de Expectativa</option></select>
+          </div>
+        </div>
+        <div class="field"><label class="lbl">Vaciado emocional</label><textarea id="de-vaciado" rows="3" placeholder="Escribe libremente la carga emocional que queda de esta sesión..."></textarea></div>
+        <div class="field"><label class="lbl">Lección genuina — esta operación me enseñó que...</label><textarea id="de-leccion" rows="2" placeholder="Una lección honesta, no un sermón..."></textarea></div>
+        <button class="btn" onclick="saveEmocional()">Guardar entrada</button>
+      </div>
+    </div>
+
+    <!-- PATRONES -->
+    <div class="page" id="page-patrones">
+      <div class="page-title">Patrones</div>
+      <div class="page-sub">Diccionario personal de errores — mecánicos, no morales</div>
+      <div class="alert-box">El patrón no es moral, es mecánico. Sustituye el juicio («soy indisciplinado») por la observación clínica («tengo una secuencia que se activa bajo presión»).</div>
+      <div class="card">
+        <div class="grid2" style="margin-bottom:14px">
+          <div class="field"><label class="lbl">ID del patrón</label><input type="text" id="pt-id" placeholder="Ej. PT_01_Mover_Stop"></div>
+          <div class="field"><label class="lbl">Trigger disparador</label><input type="text" id="pt-trigger" placeholder="Escena exacta del mercado que lo activa"></div>
+        </div>
+        <div class="grid2" style="margin-bottom:14px">
+          <div class="field"><label class="lbl">Emoción surgida</label><input type="text" id="pt-emocion" placeholder="Urgencia, pánico, rabia..."></div>
+          <div class="field"><label class="lbl">Impulso automático</label><input type="text" id="pt-impulso" placeholder="A qué conducta reactiva empuja"></div>
+        </div>
+        <div class="field"><label class="lbl">Premisa invisible — la convicción que hace que el error parezca coherente</label><textarea id="pt-premisa" rows="2" placeholder="Ej. «Perder esta operación equivale a fracasar como persona»"></textarea></div>
+        <div class="grid2" style="margin-bottom:14px">
+          <div class="field"><label class="lbl">Lenguaje vago (antes)</label><input type="text" id="pt-vago" placeholder="Ej. «Tuve miedo»"></div>
+          <div class="field"><label class="lbl">Lenguaje preciso (ahora)</label><input type="text" id="pt-preciso" placeholder="Ej. «Entré tarde por urgencia tras ver una vela salir sin mí»"></div>
+        </div>
+        <div class="field"><label class="lbl">Antídoto específico</label><textarea id="pt-antidoto" rows="2" placeholder="Respuesta diseñada para destruir esa premisa raíz..."></textarea></div>
+        <button class="btn" onclick="savePatron()">Guardar patrón</button>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-label">Patrones registrados</div>
+        <div id="patrones-list"><div class="empty-state">Sin patrones registrados</div></div>
+      </div>
+    </div>
+
+    <!-- PROTOCOLOS -->
+    <div class="page" id="page-protocolos">
+      <div class="page-title">Protocolos</div>
+      <div class="page-sub">Arquitectura de ejecución fija — elimina la negociación interna</div>
+      <div class="card">
+        <div class="field"><label class="lbl">Plan de vuelo sintético — UNA frase que describe tu operativa base</label><input type="text" id="pr-vuelo" placeholder="Ej. Opero pullbacks en tendencia con RR mínimo 1:2 en sesión de Londres"></div>
+        <div class="field"><label class="lbl">Stop emocional — condición observable que detiene la sesión sin excepciones</label><input type="text" id="pr-stop" placeholder="Ej. Dos SL seguidos en la misma sesión → cerrar plataforma"></div>
+        <div class="field"><label class="lbl">Condición de no operativa</label><textarea id="pr-noop" rows="2" placeholder="Cuándo está prohibido abrir la plataforma: menos de X horas de sueño, discusión previa..."></textarea></div>
+        <div class="grid2">
+          <div class="field"><label class="lbl">Protocolo de restauración</label><input type="text" id="pr-restauracion" placeholder="Ej. 3 respiraciones + 5 min fuera de la habitación"></div>
+          <div class="field"><label class="lbl">Ritual de cierre de sesión</label><input type="text" id="pr-cierre" placeholder="Ej. Cerrar gráficos, anotar síntoma, salir a caminar"></div>
+        </div>
+        <div class="sep"></div>
+        <div class="section-head">Hoja anti-liadas</div>
+        <div class="hint" style="margin-bottom:12px">Peores hábitos históricos — leer antes de clicar comprar/vender</div>
+        <div id="antilaidas-list" style="margin-bottom:10px"></div>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="new-antiliada" placeholder="Añadir hábito destructor..." style="flex:1" onkeydown="if(event.key===&#39;Enter&#39;)addAntiliada()">
+          <button class="btn-ghost" onclick="addAntiliada()">+ Añadir</button>
+        </div>
+        <div style="margin-top:16px"><button class="btn" onclick="saveProtocolos()">Guardar protocolos</button></div>
+      </div>
+    </div>
+
+    <!-- EVOLUCIÓN -->
+    <div class="page" id="page-evolucion">
+      <div class="page-title">Evolución</div>
+      <div class="page-sub">El progreso real se mide en el suelo de tu peor momento, no en tu mejor día</div>
+      <div class="card">
+        <div class="field"><label class="lbl">Mes auditado</label><input type="text" id="ev-mes" placeholder="Ej. Junio 2026"></div>
+        <div class="grid2" style="margin-bottom:14px">
+          <div class="field"><label class="lbl">C-Game pasado — comportamiento en el peor día</label><textarea id="ev-cgame-antes" rows="3" placeholder="Ej. «Una pérdida de 1R me llevaba a tres operaciones de revancha inmediatas»"></textarea></div>
+          <div class="field"><label class="lbl">C-Game actual — cómo respondo hoy al mismo escenario</label><textarea id="ev-cgame-ahora" rows="3" placeholder="¿Qué ha cambiado en tu peor versión?"></textarea></div>
+        </div>
+        <div class="grid2" style="margin-bottom:14px">
+          <div class="field"><label class="lbl">Duración del secuestro emocional antes (min)</label><input type="number" id="ev-sec-antes" placeholder="Ej. 45"></div>
+          <div class="field"><label class="lbl">Duración del secuestro emocional ahora (min)</label><input type="number" id="ev-sec-ahora" placeholder="Ej. 10"></div>
+        </div>
+        <div class="grid2" style="margin-bottom:14px">
+          <div class="field"><label class="lbl">Contención de daño antes</label><input type="text" id="ev-daño-antes" placeholder="Ej. -5R en una tarde"></div>
+          <div class="field"><label class="lbl">Contención de daño ahora</label><input type="text" id="ev-daño-ahora" placeholder="Ej. máximo -1.5R"></div>
+        </div>
+        <div class="field"><label class="lbl">Ya no tolero</label><textarea id="ev-notolero" rows="2" placeholder="Conductas que antes veías como normales y ahora rechazas..."></textarea></div>
+        <div class="field"><label class="lbl">Herramientas que funcionan</label><textarea id="ev-herramientas" rows="2" placeholder="Protocolos sostenidos con evidencia..."></textarea></div>
+        <div class="field"><label class="lbl">Pendiente — patrones que aún resisten</label><textarea id="ev-pendiente" rows="2" placeholder="Lo que aún no has podido trabajar..."></textarea></div>
+        <div class="field"><label class="lbl">Dirección próxima</label><input type="text" id="ev-direccion" placeholder="Una dirección concreta para el siguiente período"></div>
+        <button class="btn" onclick="saveEvolucion()">Guardar auditoría</button>
+      </div>
+    </div>
+
+    <!-- IDENTIDAD -->
+    <div class="page" id="page-creencias">
+      <div class="page-title">Identidad</div>
+      <div class="page-sub">La identidad no describe — autoriza y limita. Cambia cuando actúas diferente, no cuando piensas diferente.</div>
+      <div class="card">
+        <div class="section-head">Escáner de creencias — completa sin pensar demasiado</div>
+        <div class="field"><label class="lbl">«Cuando pierdo dinero en una operación, soy...»</label><input type="text" id="cr-1" placeholder="Respuesta honesta, sin filtro"></div>
+        <div class="field"><label class="lbl">«Un trader de verdad debería...»</label><input type="text" id="cr-2" placeholder=""></div>
+        <div class="field"><label class="lbl">«Si pierdo tres operaciones seguidas, significa que...»</label><input type="text" id="cr-3" placeholder=""></div>
+        <div class="field"><label class="lbl">«El dinero es...»</label><input type="text" id="cr-4" placeholder=""></div>
+        <div class="field"><label class="lbl">«Quedarme fuera de un movimiento significa...»</label><input type="text" id="cr-5" placeholder=""></div>
+        <div class="sep"></div>
+        <div class="field"><label class="lbl">Creencia limitante — la que más influye en tu operativa</label><textarea id="cr-limitante" rows="2" placeholder="Formulada con precisión clínica..."></textarea></div>
+        <div class="field"><label class="lbl">Mecanismo — por qué esa creencia hace que el error parezca coherente en el momento</label><textarea id="cr-mecanismo" rows="2" placeholder="No es estupidez — tiene una lógica interna..."></textarea></div>
+        <div class="field"><label class="lbl">Creencia potenciadora — versión funcional y sostenible (no una afirmación vacía)</label><textarea id="cr-potenciadora" rows="2" placeholder="Algo que puedes sostener con honestidad..."></textarea></div>
+        <div class="sep"></div>
+        <div class="field"><label class="lbl">Identidad antigua — la sentencia que has estado obedeciendo</label><input type="text" id="cr-antigua" placeholder="Ej. «Soy el tipo que siempre la lía al final»"></div>
+        <div class="field"><label class="lbl">Identidad nueva — conductual, sobria, practicable ya</label><input type="text" id="cr-nueva" placeholder="Ej. «Soy un operador que revisa su estado antes de cada sesión»"></div>
+        <div class="sep"></div>
+        <div class="section-head">Infraestructura de rendimiento</div>
+        <div class="grid3">
+          <div class="field"><label class="lbl">Horas de sueño</label><input type="number" id="cr-sueño" placeholder="7" min="0" max="12"></div>
+          <div class="field"><label class="lbl">Estrés externo</label><select id="cr-estres"><option value="">— selecciona —</option><option>Alto</option><option>Medio</option><option>Bajo</option></select></div>
+          <div class="field"><label class="lbl">Saturación de pantallas</label><select id="cr-pantallas"><option value="">— selecciona —</option><option>Alta</option><option>Media</option><option>Baja</option></select></div>
+        </div>
+        <div style="margin-top:6px"><button class="btn" onclick="saveCreencias()">Guardar identidad</button></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var DB={trades:[],checkins:[],plan:[],emocional:[],patrones:[],protocolos:{antilaidas:[]},evolucion:[],creencias:{}};
+var radioState={};
+var multiState={};
+var chartInstance=null;
+
+function loadDB(){try{var d=localStorage.getItem('tj_v2');if(d)DB=JSON.parse(d);}catch(e){}}
+function saveDB(){try{localStorage.setItem('tj_v2',JSON.stringify(DB));}catch(e){}}
+
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2200);}
+
+function nav(id){
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active')});
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
+  document.getElementById('page-'+id).classList.add('active');
+  var items=document.querySelectorAll('.nav-item');
+  items.forEach(function(n){if(n.getAttribute('onclick')==="nav('"+id+"')")n.classList.add('active')});
+  if(id==='dashboard')updateDashboard();
+  if(id==='protocolos')loadProtocolos();
+  if(id==='patrones')renderPatrones();
+  if(id==='trades')renderTrades();
+  if(id==='plan')renderPlanHistory();
+  if(id==='creencias')loadCreencias();
+}
+
+function selectRadio(group,val){
+  var args=Array.prototype.slice.call(arguments,2);
+  radioState[group]=val;
+  args.forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('selected')});
+  if(args.length>0){var el=document.getElementById(args[0]);if(el)el.classList.add('selected');}
+}
+
+function toggleMulti(el,group){
+  el.classList.toggle('selected');
+  if(!multiState[group])multiState[group]=[];
+  var txt=el.textContent.trim();
+  var idx=multiState[group].indexOf(txt);
+  if(idx>-1)multiState[group].splice(idx,1);
+  else multiState[group].push(txt);
+}
+
+function gV(id){var el=document.getElementById(id);return el?el.value.trim():'';}
+
+function calcR(){
+  var r=parseFloat(document.getElementById('tr-riesgo').value)||0;
+  var n=parseFloat(document.getElementById('tr-nominal').value)||0;
+  var el=document.getElementById('tr-r-display');
+  if(r>0){
+    var rv=(n/r).toFixed(2);
+    el.textContent=(n>=0?'+':'')+rv+'R';
+    el.style.color=n>=0?'#7ecb9e':'#c96060';
+  } else {
+    el.textContent='—';
+    el.style.color='#7ecb9e';
+  }
+}
+
+function saveTrade(){
+  var r=parseFloat(gV('tr-riesgo'))||0;
+  var n=parseFloat(gV('tr-nominal'))||0;
+  var trade={
+    id:Date.now(),fecha:gV('tr-fecha'),activo:gV('tr-activo'),mercado:gV('tr-mercado'),
+    tipo:radioState['tr-tipo']||'',entrada:gV('tr-entrada'),salida:gV('tr-salida'),
+    riesgo:r,nominal:n,r:r>0?(n/r):0,
+    tecnico:gV('tr-tecnico'),sintoma:radioState['ts']||'',
+    tag:gV('tr-tag'),tilt:gV('tr-tilt'),umbral:radioState['umbral']||'',
+    notas:gV('tr-notas')
+  };
+  DB.trades.unshift(trade);saveDB();renderTrades();
+  ['tr-activo','tr-entrada','tr-salida','tr-riesgo','tr-nominal','tr-notas'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('tr-r-display').textContent='—';
+  document.getElementById('tr-r-display').style.color='#7ecb9e';
+  radioState['tr-tipo']=radioState['ts']=radioState['umbral']='';
+  ['tr-buy','tr-sell','ts-pos','ts-mat','ts-neg','umb-si','umb-no'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('selected')});
+  document.querySelectorAll('#page-trades input[type=checkbox]').forEach(function(el){el.checked=false});
+  showToast('Trade guardado ✓');
+}
+
+function renderTrades(){
+  var tbody=document.getElementById('trades-list');
+  if(!DB.trades.length){tbody.innerHTML='<tr><td colspan="8" class="empty-state">Sin trades registrados</td></tr>';return;}
+  tbody.innerHTML=DB.trades.slice(0,30).map(function(t){
+    var rval=(t.r>=0?'+':'')+t.r.toFixed(2)+'R';
+    var rcol=t.r>=0?'#7ecb9e':'#c96060';
+    var bClass=t.tecnico==='TP'?'tp':t.tecnico==='SL'?'sl':t.tecnico==='BE'?'be':'nop';
+    var scol=t.sintoma==='pos'?'#7ecb9e':t.sintoma==='neg'?'#c96060':'#c8973a';
+    return '<tr><td>'+t.fecha+'</td><td style="color:#d0d0d0;font-weight:500">'+t.activo+'</td><td style="color:'+(t.tipo==='buy'?'#7ecb9e':'#c96060')+'">'+t.tipo.toUpperCase()+'</td><td><span class="badge '+bClass+'">'+t.tecnico+'</span></td><td style="color:'+rcol+';font-weight:600">'+rval+'</td><td>'+t.tag+'</td><td style="font-size:11px">'+t.tilt.replace('Tilt de ','')+'</td><td style="color:'+scol+'">'+t.sintoma+'</td></tr>';
+  }).join('');
+}
+
+function saveCheckin(){
+  var ci={
+    id:Date.now(),fecha:gV('ci-fecha'),presencia:document.getElementById('ci-presencia').value,
+    carga:multiState['carga']||[],emocion:gV('ci-emocion'),necesidad:gV('ci-necesidad'),
+    narrativa:gV('ci-narrativa'),ancla:gV('ci-ancla'),sombra:gV('ci-sombra'),compromiso:gV('ci-compromiso'),
+    siguioPlan:radioState['ci-plan']||'',rompioNorma:radioState['ci-norma']||'',
+    riesgoCumplido:radioState['ci-riesgo']||'',resultado:gV('ci-resultado'),
+    sintoma:radioState['ci-sintoma']||''
+  };
+  DB.checkins.unshift(ci);saveDB();showToast('Check-in guardado ✓');
+}
+
+function savePlan(){
+  var plan={id:Date.now(),semana:gV('p-semana'),sesgo:gV('p-sesgo'),reglas:gV('p-reglas'),reto:gV('p-reto'),marco:gV('p-marco'),compromiso:gV('p-compromiso'),cumplido:radioState['plan-cumplido']||''};
+  DB.plan.unshift(plan);saveDB();renderPlanHistory();showToast('Plan guardado ✓');
+}
+
+function renderPlanHistory(){
+  if(!DB.plan.length)return;
+  document.getElementById('plan-history-card').style.display='block';
+  document.getElementById('plan-history').innerHTML=DB.plan.slice(0,8).map(function(p){
+    return '<div class="history-item"><div class="h-title">'+p.semana+'<span style="margin-left:12px;font-size:12px;color:'+(p.cumplido==='si'?'#7ecb9e':'#555')+'">'+( p.cumplido==='si'?'✓ Cumplido':p.cumplido==='no'?'✗ No cumplido':'Pendiente')+'</span></div><div class="h-sub">'+p.sesgo+'</div></div>';
+  }).join('');
+}
+
+function saveEmocional(){
+  DB.emocional.unshift({id:Date.now(),trigger:gV('de-trigger'),emocion:gV('de-emocion'),impulso:gV('de-impulso'),contexto:gV('de-contexto'),pensamiento:gV('de-pensamiento'),conducta:gV('de-conducta'),palanca:gV('de-palanca'),filtro:radioState['de-filtro']||'',tilt:gV('de-tilt'),vaciado:gV('de-vaciado'),leccion:gV('de-leccion')});
+  saveDB();showToast('Entrada guardada ✓');
+}
+
+function savePatron(){
+  DB.patrones.unshift({id:Date.now(),ptId:gV('pt-id'),trigger:gV('pt-trigger'),emocion:gV('pt-emocion'),impulso:gV('pt-impulso'),premisa:gV('pt-premisa'),vago:gV('pt-vago'),preciso:gV('pt-preciso'),antidoto:gV('pt-antidoto')});
+  saveDB();renderPatrones();showToast('Patrón guardado ✓');
+}
+
+function renderPatrones(){
+  var list=document.getElementById('patrones-list');
+  if(!DB.patrones.length){list.innerHTML='<div class="empty-state">Sin patrones registrados</div>';return;}
+  list.innerHTML=DB.patrones.map(function(p,i){
+    return '<div class="pattern-item"><div class="p-id">'+p.ptId+'<button onclick="deletePatron('+i+')" style="float:right;background:none;border:none;color:#444;cursor:pointer;font-size:12px">✕</button></div><div class="p-trigger">Trigger: '+p.trigger+'</div><div class="p-lang">«'+p.vago+'» → «'+p.preciso+'»</div></div>';
+  }).join('');
+}
+
+function deletePatron(i){DB.patrones.splice(i,1);saveDB();renderPatrones();}
+
+function addAntiliada(){
+  var val=document.getElementById('new-antiliada').value.trim();
+  if(!val)return;
+  if(!DB.protocolos.antilaidas)DB.protocolos.antilaidas=[];
+  DB.protocolos.antilaidas.push(val);
+  document.getElementById('new-antiliada').value='';
+  renderAntilaidas();
+}
+
+function renderAntilaidas(){
+  var list=document.getElementById('antilaidas-list');
+  if(!DB.protocolos.antilaidas||!DB.protocolos.antilaidas.length){list.innerHTML='';return;}
+  list.innerHTML=DB.protocolos.antilaidas.map(function(a,i){
+    return '<div class="checklist-item"><span style="flex:1">'+a+'</span><span onclick="removeAntiliada('+i+')" style="cursor:pointer;color:#444;font-size:18px;line-height:1">×</span></div>';
+  }).join('');
+}
+
+function removeAntiliada(i){DB.protocolos.antilaidas.splice(i,1);renderAntilaidas();}
+
+function loadProtocolos(){
+  var p=DB.protocolos;
+  ['vuelo','stop','noop','restauracion','cierre'].forEach(function(k){var el=document.getElementById('pr-'+k);if(el&&p[k])el.value=p[k];});
+  renderAntilaidas();
+}
+
+function saveProtocolos(){
+  ['vuelo','stop','noop','restauracion','cierre'].forEach(function(k){DB.protocolos[k]=gV('pr-'+k);});
+  saveDB();showToast('Protocolos guardados ✓');
+}
+
+function saveEvolucion(){
+  DB.evolucion.unshift({id:Date.now(),mes:gV('ev-mes'),cgameAntes:gV('ev-cgame-antes'),cgameAhora:gV('ev-cgame-ahora'),secAntes:gV('ev-sec-antes'),secAhora:gV('ev-sec-ahora'),dañoAntes:gV('ev-daño-antes'),dañoAhora:gV('ev-daño-ahora'),noTolero:gV('ev-notolero'),herramientas:gV('ev-herramientas'),pendiente:gV('ev-pendiente'),direccion:gV('ev-direccion')});
+  saveDB();showToast('Auditoría guardada ✓');
+}
+
+function loadCreencias(){
+  var c=DB.creencias;
+  ['1','2','3','4','5'].forEach(function(k){var el=document.getElementById('cr-'+k);if(el&&c['cr'+k])el.value=c['cr'+k];});
+  ['limitante','mecanismo','potenciadora','antigua','nueva','sueño','estres','pantallas'].forEach(function(k){var el=document.getElementById('cr-'+k);if(el&&c[k])el.value=c[k];});
+}
+
+function saveCreencias(){
+  var c={};
+  ['1','2','3','4','5'].forEach(function(k){c['cr'+k]=gV('cr-'+k);});
+  ['limitante','mecanismo','potenciadora','antigua','nueva','sueño','estres','pantallas'].forEach(function(k){c[k]=gV('cr-'+k);});
+  DB.creencias=c;saveDB();showToast('Identidad guardada ✓');
+}
+
+function updateDashboard(){
+  var trades=DB.trades;
+  var checkins=DB.checkins;
+  var ci=checkins.length;
+  document.getElementById('d-checkins').textContent=ci;
+  if(ci>0){
+    var plan=checkins.filter(function(c){return c.siguioPlan==='si'}).length;
+    var normas=checkins.filter(function(c){return c.rompioNorma==='no'}).length;
+    var riesgo=checkins.filter(function(c){return c.riesgoCumplido==='si'}).length;
+    document.getElementById('d-plan').textContent=Math.round(plan/ci*100)+'%';
+    document.getElementById('d-normas').textContent=Math.round(normas/ci*100)+'%';
+    document.getElementById('d-riesgo').textContent=Math.round(riesgo/ci*100)+'%';
+  }
+  var t=trades.filter(function(x){return x.tecnico&&x.tecnico!=='No operé'});
+  var tp=trades.filter(function(x){return x.tecnico==='TP'}).length;
+  var sl=trades.filter(function(x){return x.tecnico==='SL'}).length;
+  var be=trades.filter(function(x){return x.tecnico==='BE'}).length;
+  var nop=trades.filter(function(x){return x.tecnico==='No operé'}).length;
+  var pnlR=trades.reduce(function(s,x){return s+x.r},0);
+  var pel=document.getElementById('d-pnlr');
+  pel.textContent=(pnlR>=0?'+':'')+pnlR.toFixed(2)+'R';
+  pel.className='metric-val '+(pnlR>=0?'green':'red');
+  document.getElementById('d-results').innerHTML='<span class="tag pos">'+tp+' TP</span><span class="tag neg">'+sl+' SL</span><span class="tag neu">'+be+' BE</span><span class="tag">'+nop+' No operé</span>';
+  var spos=trades.filter(function(x){return x.sintoma==='pos'}).length;
+  var smat=trades.filter(function(x){return x.sintoma==='mat'}).length;
+  var sneg=trades.filter(function(x){return x.sintoma==='neg'}).length;
+  document.getElementById('d-sintomas').innerHTML='<span class="tag pos">'+spos+' Positivos</span><span class="tag neu">'+smat+' Matiz</span><span class="tag neg">'+sneg+' Negativos</span>';
+  if(t.length>0){
+    var wins=t.filter(function(x){return x.r>0}).length;
+    var wr=wins/t.length;
+    document.getElementById('d-wr').textContent=Math.round(wr*100)+'%';
+    var gW=t.filter(function(x){return x.r>0});
+    var lW=t.filter(function(x){return x.r<0});
+    var avgW=gW.length>0?gW.reduce(function(s,x){return s+x.r},0)/gW.length:0;
+    var avgL=lW.length>0?Math.abs(lW.reduce(function(s,x){return s+x.r},0)/lW.length):0;
+    var gProfit=gW.reduce(function(s,x){return s+x.r},0);
+    var lProfit=Math.abs(lW.reduce(function(s,x){return s+x.r},0));
+    document.getElementById('d-pf').textContent=lProfit>0?(gProfit/lProfit).toFixed(2):'∞';
+    document.getElementById('d-exp').textContent=((wr*avgW)-((1-wr)*avgL)).toFixed(2)+'R';
+    if(t.length>=5){
+      var lines=[];
+      var fomoT=t.filter(function(x){return x.tag==='FOMO'});
+      if(fomoT.length>0){var fa=fomoT.reduce(function(s,x){return s+x.r},0)/fomoT.length;lines.push('FOMO: '+fomoT.length+' trades, resultado medio '+(fa>=0?'+':'')+fa.toFixed(2)+'R');}
+      var revT=t.filter(function(x){return x.tag==='Revancha'});
+      if(revT.length>0){var ra=revT.reduce(function(s,x){return s+x.r},0)/revT.length;lines.push('Revancha: '+revT.length+' trades, resultado medio '+(ra>=0?'+':'')+ra.toFixed(2)+'R');}
+      var tiltT=t.filter(function(x){return x.tilt&&x.tilt!=='Ninguno'&&x.tilt!==''});
+      if(tiltT.length>0)lines.push('Tilt activo en '+Math.round(tiltT.length/t.length*100)+'% de las sesiones');
+      document.getElementById('d-detector').innerHTML=lines.length?lines.map(function(l){return '<div style="margin-bottom:5px;color:#666">· '+l+'</div>'}).join(''):'Sin correlaciones detectables todavía.';
+    }
+  }
+  renderEquityChart(trades);
+}
+
+function renderEquityChart(trades){
+  var ctx=document.getElementById('equity-chart');
+  if(!ctx)return;
+  if(chartInstance){chartInstance.destroy();chartInstance=null;}
+  var sorted=[].concat(trades).reverse();
+  var labels=['Inicio'];var data=[0];var cum=0;
+  sorted.forEach(function(t,i){cum+=t.r;labels.push(t.fecha||'T'+(i+1));data.push(parseFloat(cum.toFixed(2)));});
+  chartInstance=new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{label:'R',data:data,borderColor:'#7ecb9e',backgroundColor:'rgba(126,203,158,0.06)',borderWidth:1.5,pointRadius:data.length>30?0:2,tension:0.3,fill:true}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return(c.parsed.y>=0?'+':'')+c.parsed.y.toFixed(2)+'R';}}}},scales:{x:{display:false},y:{grid:{color:'#1a1a1a'},ticks:{color:'#444',font:{size:11},callback:function(v){return(v>=0?'+':'')+v+'R';}}}}}});
+}
+
+function exportData(){
+  var blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='trading-journal-'+new Date().toISOString().split('T')[0]+'.json';a.click();
+  showToast('Datos exportados ✓');
+}
+
+function importData(e){
+  var file=e.target.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){try{DB=JSON.parse(ev.target.result);saveDB();updateDashboard();showToast('Datos importados ✓');}catch(err){alert('Error al importar: archivo JSON inválido');}};
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+window.addEventListener('load',function(){
+  loadDB();
+  var today=new Date().toISOString().split('T')[0];
+  ['ci-fecha','tr-fecha'].forEach(function(id){var el=document.getElementById(id);if(el)el.value=today;});
+  updateDashboard();
+  renderPlanHistory();
+});
+</script>
+
+
+</body></html>
