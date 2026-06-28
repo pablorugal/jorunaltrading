@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<!-- saved from url=(0050)file:///Users/pablo/Downloads/trading-journal.html -->
+<!-- saved from url=(0040)file:///Users/pablo/Downloads/index.html -->
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Trading Journal</title>
 <script src="./index_files/chart.umd.min.js"></script>
+<script src="./index_files/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d0d0d;color:#e0e0e0}
@@ -15,15 +16,15 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 .nav-item:hover{color:#ccc;background:#161616}
 .nav-item.active{color:#7ecb9e;border-left-color:#7ecb9e;background:#161616}
 .nav-item svg{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.5}
-.sidebar-footer{margin-top:auto;padding:16px 18px;display:flex;gap:8px}
+.sidebar-footer{margin-top:auto;padding:16px 18px;display:flex;gap:8px;flex-wrap:wrap}
 .main{flex:1;overflow-y:auto;padding:32px 36px;background:#0d0d0d}
 .page{display:none}
 .page.active{display:block}
 .page-title{font-size:18px;font-weight:500;color:#e0e0e0;margin-bottom:4px}
 .page-sub{font-size:13px;color:#444;margin-bottom:24px}
 .card{background:#141414;border:1px solid #1e1e1e;border-radius:10px;padding:22px}
-.card+.card,.card+div>.card{margin-top:16px}
-.card-label{font-size:11px;font-weight:600;color:#444;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card+.card{margin-top:16px}
+.card-label{font-size:11px;font-weight:600;color:#444;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:14px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
@@ -32,22 +33,19 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 label.lbl{font-size:12px;color:#555;display:block;margin-bottom:5px}
 input[type=text],input[type=number],input[type=date],select,textarea{width:100%;background:#1a1a1a;border:1px solid #222;border-radius:6px;color:#d0d0d0;font-size:13px;padding:8px 11px;font-family:inherit;outline:none;transition:border 0.15s;appearance:none}
 input:focus,select:focus,textarea:focus{border-color:#333}
-select{cursor:pointer}
 textarea{resize:vertical;line-height:1.6}
 input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
 .btn{background:#7ecb9e;color:#0a1f12;border:none;border-radius:6px;padding:9px 20px;font-size:13px;font-weight:600;cursor:pointer;transition:opacity 0.15s;font-family:inherit}
 .btn:hover{opacity:0.85}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
 .btn-sm{padding:6px 14px;font-size:12px}
 .btn-ghost{background:transparent;border:1px solid #222;color:#666;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;font-family:inherit;transition:all 0.15s}
 .btn-ghost:hover{border-color:#333;color:#aaa}
-.btn-ghost.danger{color:#c96060;border-color:#3a1a1a}
-.btn-ghost.danger:hover{background:#1a0a0a}
 .metric{background:#141414;border:1px solid #1e1e1e;border-radius:8px;padding:14px 16px}
 .metric-label{font-size:11px;color:#444;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.06em}
 .metric-val{font-size:22px;font-weight:500;color:#e0e0e0}
 .metric-val.green{color:#7ecb9e}
 .metric-val.red{color:#c96060}
-.metric-val.amber{color:#c8973a}
 .tag{display:inline-block;font-size:11px;padding:3px 9px;border-radius:4px;background:#1a1a1a;border:1px solid #222;color:#666;margin:2px}
 .tag.pos{background:#0a1f12;border-color:#1a4d28;color:#7ecb9e}
 .tag.neg{background:#1f0a0a;border-color:#4d1a1a;color:#c96060}
@@ -57,8 +55,7 @@ input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
 .radio-opt{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#666;padding:7px 12px;border:1px solid #222;border-radius:6px;transition:all 0.15s;user-select:none}
 .radio-opt:hover{border-color:#333;color:#bbb}
 .radio-opt.selected{border-color:#7ecb9e;color:#7ecb9e;background:#0a1f12}
-.radio-opt.selected-red{border-color:#c96060;color:#c96060;background:#1f0a0a}
-.multi-opt{cursor:pointer;font-size:13px;color:#666;padding:6px 12px;border:1px solid #222;border-radius:6px;transition:all 0.15s;user-select:none;margin:3px}
+.multi-opt{cursor:pointer;font-size:13px;color:#666;padding:6px 12px;border:1px solid #222;border-radius:6px;transition:all 0.15s;user-select:none;margin:3px;display:inline-block}
 .multi-opt:hover{border-color:#333;color:#bbb}
 .multi-opt.selected{border-color:#7ecb9e;color:#7ecb9e;background:#0a1f12}
 .section-head{font-size:11px;font-weight:600;color:#444;text-transform:uppercase;letter-spacing:0.1em;margin:20px 0 12px}
@@ -83,10 +80,9 @@ input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
 .r-display{background:#1a1a1a;border:1px solid #222;border-radius:6px;padding:8px 11px;font-size:15px;font-weight:600;color:#7ecb9e;min-height:36px;display:flex;align-items:center}
 .hint{font-size:11px;color:#3a3a3a;margin-top:5px;line-height:1.5}
 .toast{position:fixed;bottom:24px;right:24px;background:#1a2e1f;border:1px solid #2d5a3a;color:#7ecb9e;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none}
+.toast.error{background:#2e1a1a;border-color:#5a2d2d;color:#c96060}
 .toast.show{opacity:1}
 .empty-state{font-size:13px;color:#333;padding:16px 0;text-align:center}
-.row-flex{display:flex;gap:12px;align-items:flex-end}
-.row-flex>*{flex:1}
 .history-item{padding:12px 0;border-bottom:1px solid #1a1a1a}
 .history-item:last-child{border:none}
 .history-item .h-title{font-size:13px;color:#aaa;font-weight:500;margin-bottom:3px}
@@ -95,6 +91,9 @@ input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
 .pattern-item .p-id{font-size:11px;font-weight:600;color:#7ecb9e;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
 .pattern-item .p-trigger{font-size:12px;color:#666;margin-bottom:3px}
 .pattern-item .p-lang{font-size:11px;color:#3a3a3a;font-style:italic}
+.sync-indicator{font-size:11px;color:#444;padding:4px 0;text-align:center}
+.sync-indicator.syncing{color:#c8973a}
+.sync-indicator.synced{color:#7ecb9e}
 </style>
 </head>
 <body>
@@ -104,55 +103,44 @@ input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
 <div class="app">
   <div class="sidebar">
     <div class="logo">Trading Journal</div>
-    <div class="nav-item" onclick="nav(&#39;dashboard&#39;)">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>
-      Dashboard
+    <div class="nav-item active" onclick="nav(&#39;dashboard&#39;)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>Dashboard
     </div>
     <div class="nav-item" onclick="nav(&#39;plan&#39;)">
-      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-      Plan semanal
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>Plan semanal
     </div>
-    <div class="nav-item active" onclick="nav(&#39;checkin&#39;)">
-      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path></svg>
-      Check-in diario
+    <div class="nav-item" onclick="nav(&#39;checkin&#39;)">
+      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path></svg>Check-in diario
     </div>
     <div class="nav-item" onclick="nav(&#39;trades&#39;)">
-      <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
-      Trades
+      <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>Trades
     </div>
     <div class="nav-item" onclick="nav(&#39;emocional&#39;)">
-      <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"></path></svg>
-      Diario emocional
+      <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"></path></svg>Diario emocional
     </div>
     <div class="nav-item" onclick="nav(&#39;patrones&#39;)">
-      <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 014-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 01-4 4H3"></path></svg>
-      Patrones
+      <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 014-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 01-4 4H3"></path></svg>Patrones
     </div>
     <div class="nav-item" onclick="nav(&#39;protocolos&#39;)">
-      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-      Protocolos
+      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>Protocolos
     </div>
     <div class="nav-item" onclick="nav(&#39;evolucion&#39;)">
-      <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-      Evolución
+      <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>Evolución
     </div>
     <div class="nav-item" onclick="nav(&#39;creencias&#39;)">
-      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-      Identidad
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Identidad
     </div>
     <div class="sidebar-footer">
-      <button class="btn-ghost btn-sm" onclick="exportData()">Exportar</button>
-      <button class="btn-ghost btn-sm" onclick="document.getElementById(&#39;import-input&#39;).click()">Importar</button>
-      <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
+      <div class="sync-indicator synced" id="sync-status">● Sincronizado</div>
     </div>
   </div>
 
   <div class="main">
 
     <!-- DASHBOARD -->
-    <div class="page" id="page-dashboard">
+    <div class="page active" id="page-dashboard">
       <div class="page-title">Dashboard</div>
-      <div class="page-sub" id="dash-sub">Resumen de proceso y trading</div>
+      <div class="page-sub">Resumen de proceso y trading</div>
       <div class="grid4" style="margin-bottom:14px">
         <div class="metric"><div class="metric-label">Check-ins</div><div class="metric-val" id="d-checkins">0</div></div>
         <div class="metric"><div class="metric-label">Siguiendo plan</div><div class="metric-val green" id="d-plan">—</div></div>
@@ -169,12 +157,12 @@ input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
         <div class="card">
           <div class="card-label">Resultados</div>
           <div id="d-results" style="margin-bottom:12px"><span class="tag pos">0 TP</span><span class="tag neg">0 SL</span><span class="tag neu">0 BE</span><span class="tag">0 No operé</span></div>
-          <div class="card-label">Síntomas emocionales</div>
+          <div class="card-label">Síntomas</div>
           <div id="d-sintomas"><span class="tag pos">0 Positivos</span><span class="tag neu">0 Matiz</span><span class="tag neg">0 Negativos</span></div>
         </div>
         <div class="card">
           <div class="card-label">Detector de patrones</div>
-          <div id="d-detector" style="font-size:12px;color:#333;line-height:1.8">Registra al menos 5 trades para activar el detector automático.</div>
+          <div id="d-detector" style="font-size:12px;color:#333;line-height:1.8">Registra al menos 5 trades para activar el detector.</div>
         </div>
       </div>
       <div class="card">
@@ -190,16 +178,16 @@ input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
       <div class="card">
         <div class="grid2">
           <div class="field"><label class="lbl">Semana</label><input type="text" id="p-semana" placeholder="Semana 01 — Junio 2026"></div>
-          <div class="field"><label class="lbl">Sesgo de mercado</label><input type="text" id="p-sesgo" placeholder="Ej. Alcista en NQ, bajista en DXY"></div>
+          <div class="field"><label class="lbl">Sesgo de mercado</label><input type="text" id="p-sesgo" placeholder="Ej. Alcista en NQ"></div>
         </div>
-        <div class="field"><label class="lbl">Reglas activas esta semana</label><textarea id="p-reglas" rows="2" placeholder="Reglas específicas que te autoimpones..."></textarea></div>
+        <div class="field"><label class="lbl">Reglas activas esta semana</label><textarea id="p-reglas" rows="2" placeholder="Reglas específicas..."></textarea></div>
         <div class="grid2">
-          <div class="field"><label class="lbl">Reto psicológico (La Senda)</label><input type="text" id="p-reto" placeholder="Ej. Inventario del Tilt, Medir en R"></div>
+          <div class="field"><label class="lbl">Reto psicológico</label><input type="text" id="p-reto" placeholder="Ej. Inventario del Tilt"></div>
           <div class="field"><label class="lbl">Marco teórico / lectura</label><input type="text" id="p-marco" placeholder="Ej. Tendler, cap. 4"></div>
         </div>
-        <div class="field"><label class="lbl">Compromiso no negociable</label><textarea id="p-compromiso" rows="2" placeholder="Conducta de proceso que define el éxito semanal, independiente del P&amp;L"></textarea></div>
+        <div class="field"><label class="lbl">Compromiso no negociable</label><textarea id="p-compromiso" rows="2" placeholder="Conducta de proceso independiente del P&amp;L"></textarea></div>
         <div style="display:flex;align-items:center;gap:16px;margin-top:6px">
-          <button class="btn" onclick="savePlan()">Guardar semana</button>
+          <button class="btn" id="btn-save-plan" onclick="savePlan()">Guardar semana</button>
           <div style="display:flex;align-items:center;gap:10px;margin-left:auto">
             <span style="font-size:12px;color:#555">¿Cumplido al cierre?</span>
             <div class="radio-group" style="margin-top:0">
@@ -215,8 +203,8 @@ input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
       </div>
     </div>
 
-    <!-- CHECK-IN DIARIO -->
-    <div class="page active" id="page-checkin">
+    <!-- CHECK-IN -->
+    <div class="page" id="page-checkin">
       <div class="page-title">Check-in diario</div>
       <div class="page-sub">Pre-mercado: 5 minutos antes de abrir la plataforma</div>
       <div class="card">
@@ -230,8 +218,8 @@ input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
           </div>
         </div>
         <div class="field">
-          <label class="lbl">Carga corporal detectada (puedes seleccionar varias)</label>
-          <div style="margin-top:6px;display:flex;flex-wrap:wrap">
+          <label class="lbl">Carga corporal (puedes seleccionar varias)</label>
+          <div style="margin-top:6px">
             <div class="multi-opt" onclick="toggleMulti(this,&#39;carga&#39;)">Mandíbula apretada</div>
             <div class="multi-opt" onclick="toggleMulti(this,&#39;carga&#39;)">Hombros tensos</div>
             <div class="multi-opt" onclick="toggleMulti(this,&#39;carga&#39;)">Respiración superficial</div>
@@ -248,13 +236,12 @@ input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
             <select id="ci-necesidad"><option value="">— selecciona —</option><option>Ninguna</option><option>Recuperar dinero</option><option>Demostrar valía</option><option>Acertar la dirección</option><option>Compensar inactividad</option></select>
           </div>
         </div>
-        <div class="field"><label class="lbl">Narrativa interna — ¿qué historia me estoy contando hoy?</label><textarea id="ci-narrativa" rows="2" placeholder="Escribe libremente..."></textarea></div>
+        <div class="field"><label class="lbl">Narrativa interna</label><textarea id="ci-narrativa" rows="2" placeholder="¿Qué historia me estoy contando hoy?"></textarea></div>
         <div class="grid2" style="margin-bottom:14px">
-          <div class="field"><label class="lbl">Frase ancla</label><input type="text" id="ci-ancla" placeholder="Lo más importante que no debo perder de vista hoy"></div>
-          <div class="field"><label class="lbl">Riesgo de autosabotaje hoy</label><input type="text" id="ci-sombra" placeholder="Ej. Revancha si encadeno dos SL"></div>
+          <div class="field"><label class="lbl">Frase ancla</label><input type="text" id="ci-ancla" placeholder="Lo más importante que no debo perder de vista"></div>
+          <div class="field"><label class="lbl">Riesgo de autosabotaje</label><input type="text" id="ci-sombra" placeholder="Ej. Revancha si encadeno dos SL"></div>
         </div>
         <div class="field"><label class="lbl">Compromiso de sesión</label><input type="text" id="ci-compromiso" placeholder="Conducta no negociable de hoy"></div>
-
         <div class="sep"></div>
         <div class="section-head">Post-mercado</div>
         <div class="grid2" style="margin-bottom:14px">
@@ -274,7 +261,7 @@ input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
         <div class="field"><label class="lbl">Síntoma de sesión</label>
           <div class="radio-group"><div class="radio-opt" id="ci-sint-pos" onclick="selectRadio(&#39;ci-sintoma&#39;,&#39;pos&#39;,&#39;ci-sint-pos&#39;,&#39;ci-sint-mat&#39;,&#39;ci-sint-neg&#39;)">Positivo</div><div class="radio-opt" id="ci-sint-mat" onclick="selectRadio(&#39;ci-sintoma&#39;,&#39;mat&#39;,&#39;ci-sint-mat&#39;,&#39;ci-sint-pos&#39;,&#39;ci-sint-neg&#39;)">Matiz</div><div class="radio-opt" id="ci-sint-neg" onclick="selectRadio(&#39;ci-sintoma&#39;,&#39;neg&#39;,&#39;ci-sint-neg&#39;,&#39;ci-sint-pos&#39;,&#39;ci-sint-mat&#39;)">Negativo</div></div>
         </div>
-        <div style="margin-top:16px"><button class="btn" onclick="saveCheckin()">Guardar check-in</button></div>
+        <div style="margin-top:16px"><button class="btn" id="btn-save-checkin" onclick="saveCheckin()">Guardar check-in</button></div>
       </div>
     </div>
 
@@ -328,18 +315,18 @@ input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
           </div>
         </div>
         <div class="field">
-          <label class="lbl">Umbral de incomodidad (Steve Ward) — si esta op llega a -1R, ¿puedo mantener la calidad de mis decisiones en la siguiente?</label>
+          <label class="lbl">Umbral de incomodidad — si esta op llega a -1R, ¿puedo mantener la calidad de decisiones en la siguiente?</label>
           <div class="radio-group"><div class="radio-opt" id="umb-si" onclick="selectRadio(&#39;umbral&#39;,&#39;si&#39;,&#39;umb-si&#39;,&#39;umb-no&#39;)">Sí</div><div class="radio-opt" id="umb-no" onclick="selectRadio(&#39;umbral&#39;,&#39;no&#39;,&#39;umb-no&#39;,&#39;umb-si&#39;)">No → reconsiderar tamaño</div></div>
         </div>
         <div class="field"><label class="lbl">Notas</label><textarea id="tr-notas" rows="2" placeholder="Contexto, observaciones..."></textarea></div>
-        <button class="btn" onclick="saveTrade()">Registrar trade</button>
+        <button class="btn" id="btn-save-trade" onclick="saveTrade()">Registrar trade</button>
       </div>
       <div class="card" style="margin-top:16px">
         <div class="card-label">Historial</div>
         <div style="overflow-x:auto">
           <table class="trade-table">
             <thead><tr><th>Fecha</th><th>Activo</th><th>Dir</th><th>Resultado</th><th>R</th><th>Tag</th><th>Tilt</th><th>Síntoma</th></tr></thead>
-            <tbody id="trades-list"><tr><td colspan="8" class="empty-state">Sin trades registrados</td></tr></tbody>
+            <tbody id="trades-list"><tr><td colspan="8" class="empty-state">Cargando...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -348,10 +335,9 @@ input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
     <!-- DIARIO EMOCIONAL -->
     <div class="page" id="page-emocional">
       <div class="page-title">Diario emocional</div>
-      <div class="page-sub">Registro forense del comportamiento — en caliente y post-sesión</div>
+      <div class="page-sub">Registro forense del comportamiento</div>
       <div class="card">
         <div class="section-head">Etiqueta en caliente</div>
-        <div class="hint" style="margin-bottom:12px">El micro-espacio de 2-3 segundos durante la sesión: observa antes de actuar</div>
         <div class="grid3" style="margin-bottom:14px">
           <div class="field"><label class="lbl">Trigger — ¿qué pasó fuera?</label><input type="text" id="de-trigger" placeholder="Ej. Vela que salió sin mí"></div>
           <div class="field"><label class="lbl">Emoción surgida</label><input type="text" id="de-emocion" placeholder="Ej. Urgencia, pánico"></div>
@@ -359,26 +345,25 @@ input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
         </div>
         <div class="sep"></div>
         <div class="section-head">Secuencia del día</div>
-        <div class="hint" style="margin-bottom:12px">Reconstruye un momento relevante eslabón por eslabón</div>
         <div class="grid2" style="margin-bottom:14px">
           <div class="field"><label class="lbl">Contexto (mercado)</label><textarea id="de-contexto" rows="2" placeholder="Qué pasaba en el mercado..."></textarea></div>
           <div class="field"><label class="lbl">Pensamiento automático</label><input type="text" id="de-pensamiento" placeholder="Ej. «El mercado me la ha jugado otra vez»"></div>
         </div>
         <div class="grid2" style="margin-bottom:14px">
           <div class="field"><label class="lbl">Conducta realizada</label><input type="text" id="de-conducta" placeholder="Ej. Moví el stop loss"></div>
-          <div class="field"><label class="lbl">Punto palanca — ¿dónde intervengo la próxima vez?</label><input type="text" id="de-palanca" placeholder="Ej. En el pensamiento automático"></div>
+          <div class="field"><label class="lbl">Punto palanca</label><input type="text" id="de-palanca" placeholder="¿Dónde intervengo la próxima vez?"></div>
         </div>
         <div class="grid2" style="margin-bottom:14px">
-          <div class="field"><label class="lbl">Filtro — ¿gestión real o búsqueda de alivio emocional?</label>
+          <div class="field"><label class="lbl">Filtro — ¿gestión real o alivio emocional?</label>
             <div class="radio-group"><div class="radio-opt" id="de-g" onclick="selectRadio(&#39;de-filtro&#39;,&#39;gestion&#39;,&#39;de-g&#39;,&#39;de-a&#39;,&#39;de-n&#39;)">Gestión real</div><div class="radio-opt" id="de-a" onclick="selectRadio(&#39;de-filtro&#39;,&#39;alivio&#39;,&#39;de-a&#39;,&#39;de-g&#39;,&#39;de-n&#39;)">Alivio emocional</div><div class="radio-opt" id="de-n" onclick="selectRadio(&#39;de-filtro&#39;,&#39;na&#39;,&#39;de-n&#39;,&#39;de-g&#39;,&#39;de-a&#39;)">No aplica</div></div>
           </div>
           <div class="field"><label class="lbl">Tipo de tilt</label>
             <select id="de-tilt"><option value="">— selecciona —</option><option>Ninguno</option><option>Tilt de Pérdida</option><option>Tilt de Ganancia</option><option>Tilt de Injusticia</option><option>Tilt de Expectativa</option></select>
           </div>
         </div>
-        <div class="field"><label class="lbl">Vaciado emocional</label><textarea id="de-vaciado" rows="3" placeholder="Escribe libremente la carga emocional que queda de esta sesión..."></textarea></div>
-        <div class="field"><label class="lbl">Lección genuina — esta operación me enseñó que...</label><textarea id="de-leccion" rows="2" placeholder="Una lección honesta, no un sermón..."></textarea></div>
-        <button class="btn" onclick="saveEmocional()">Guardar entrada</button>
+        <div class="field"><label class="lbl">Vaciado emocional</label><textarea id="de-vaciado" rows="3" placeholder="Escribe libremente la carga emocional que queda..."></textarea></div>
+        <div class="field"><label class="lbl">Lección genuina — esta operación me enseñó que...</label><textarea id="de-leccion" rows="2" placeholder="Una lección honesta..."></textarea></div>
+        <button class="btn" id="btn-save-emocional" onclick="saveEmocional()">Guardar entrada</button>
       </div>
     </div>
 
@@ -390,23 +375,23 @@ input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
       <div class="card">
         <div class="grid2" style="margin-bottom:14px">
           <div class="field"><label class="lbl">ID del patrón</label><input type="text" id="pt-id" placeholder="Ej. PT_01_Mover_Stop"></div>
-          <div class="field"><label class="lbl">Trigger disparador</label><input type="text" id="pt-trigger" placeholder="Escena exacta del mercado que lo activa"></div>
+          <div class="field"><label class="lbl">Trigger disparador</label><input type="text" id="pt-trigger" placeholder="Escena exacta que lo activa"></div>
         </div>
         <div class="grid2" style="margin-bottom:14px">
           <div class="field"><label class="lbl">Emoción surgida</label><input type="text" id="pt-emocion" placeholder="Urgencia, pánico, rabia..."></div>
           <div class="field"><label class="lbl">Impulso automático</label><input type="text" id="pt-impulso" placeholder="A qué conducta reactiva empuja"></div>
         </div>
-        <div class="field"><label class="lbl">Premisa invisible — la convicción que hace que el error parezca coherente</label><textarea id="pt-premisa" rows="2" placeholder="Ej. «Perder esta operación equivale a fracasar como persona»"></textarea></div>
+        <div class="field"><label class="lbl">Premisa invisible</label><textarea id="pt-premisa" rows="2" placeholder="La convicción que hace que el error parezca coherente..."></textarea></div>
         <div class="grid2" style="margin-bottom:14px">
           <div class="field"><label class="lbl">Lenguaje vago (antes)</label><input type="text" id="pt-vago" placeholder="Ej. «Tuve miedo»"></div>
           <div class="field"><label class="lbl">Lenguaje preciso (ahora)</label><input type="text" id="pt-preciso" placeholder="Ej. «Entré tarde por urgencia tras ver una vela salir sin mí»"></div>
         </div>
-        <div class="field"><label class="lbl">Antídoto específico</label><textarea id="pt-antidoto" rows="2" placeholder="Respuesta diseñada para destruir esa premisa raíz..."></textarea></div>
-        <button class="btn" onclick="savePatron()">Guardar patrón</button>
+        <div class="field"><label class="lbl">Antídoto específico</label><textarea id="pt-antidoto" rows="2" placeholder="Respuesta para destruir esa premisa raíz..."></textarea></div>
+        <button class="btn" id="btn-save-patron" onclick="savePatron()">Guardar patrón</button>
       </div>
       <div class="card" style="margin-top:16px">
         <div class="card-label">Patrones registrados</div>
-        <div id="patrones-list"><div class="empty-state">Sin patrones registrados</div></div>
+        <div id="patrones-list"><div class="empty-state">Cargando...</div></div>
       </div>
     </div>
 
@@ -416,10 +401,10 @@ input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
       <div class="page-sub">Arquitectura de ejecución fija — elimina la negociación interna</div>
       <div class="card">
         <div class="field"><label class="lbl">Plan de vuelo sintético — UNA frase que describe tu operativa base</label><input type="text" id="pr-vuelo" placeholder="Ej. Opero pullbacks en tendencia con RR mínimo 1:2 en sesión de Londres"></div>
-        <div class="field"><label class="lbl">Stop emocional — condición observable que detiene la sesión sin excepciones</label><input type="text" id="pr-stop" placeholder="Ej. Dos SL seguidos en la misma sesión → cerrar plataforma"></div>
-        <div class="field"><label class="lbl">Condición de no operativa</label><textarea id="pr-noop" rows="2" placeholder="Cuándo está prohibido abrir la plataforma: menos de X horas de sueño, discusión previa..."></textarea></div>
+        <div class="field"><label class="lbl">Stop emocional — condición observable que detiene la sesión</label><input type="text" id="pr-stop" placeholder="Ej. Dos SL seguidos → cerrar plataforma"></div>
+        <div class="field"><label class="lbl">Condición de no operativa</label><textarea id="pr-noop" rows="2" placeholder="Cuándo está prohibido abrir la plataforma..."></textarea></div>
         <div class="grid2">
-          <div class="field"><label class="lbl">Protocolo de restauración</label><input type="text" id="pr-restauracion" placeholder="Ej. 3 respiraciones + 5 min fuera de la habitación"></div>
+          <div class="field"><label class="lbl">Protocolo de restauración</label><input type="text" id="pr-restauracion" placeholder="Ej. 3 respiraciones + 5 min fuera"></div>
           <div class="field"><label class="lbl">Ritual de cierre de sesión</label><input type="text" id="pr-cierre" placeholder="Ej. Cerrar gráficos, anotar síntoma, salir a caminar"></div>
         </div>
         <div class="sep"></div>
@@ -430,7 +415,7 @@ input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
           <input type="text" id="new-antiliada" placeholder="Añadir hábito destructor..." style="flex:1" onkeydown="if(event.key===&#39;Enter&#39;)addAntiliada()">
           <button class="btn-ghost" onclick="addAntiliada()">+ Añadir</button>
         </div>
-        <div style="margin-top:16px"><button class="btn" onclick="saveProtocolos()">Guardar protocolos</button></div>
+        <div style="margin-top:16px"><button class="btn" id="btn-save-protocolos" onclick="saveProtocolos()">Guardar protocolos</button></div>
       </div>
     </div>
 
@@ -441,22 +426,22 @@ input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
       <div class="card">
         <div class="field"><label class="lbl">Mes auditado</label><input type="text" id="ev-mes" placeholder="Ej. Junio 2026"></div>
         <div class="grid2" style="margin-bottom:14px">
-          <div class="field"><label class="lbl">C-Game pasado — comportamiento en el peor día</label><textarea id="ev-cgame-antes" rows="3" placeholder="Ej. «Una pérdida de 1R me llevaba a tres operaciones de revancha inmediatas»"></textarea></div>
-          <div class="field"><label class="lbl">C-Game actual — cómo respondo hoy al mismo escenario</label><textarea id="ev-cgame-ahora" rows="3" placeholder="¿Qué ha cambiado en tu peor versión?"></textarea></div>
+          <div class="field"><label class="lbl">C-Game pasado</label><textarea id="ev-cgame-antes" rows="3" placeholder="Comportamiento en el peor día antes..."></textarea></div>
+          <div class="field"><label class="lbl">C-Game actual</label><textarea id="ev-cgame-ahora" rows="3" placeholder="Cómo respondo hoy al mismo escenario..."></textarea></div>
         </div>
         <div class="grid2" style="margin-bottom:14px">
-          <div class="field"><label class="lbl">Duración del secuestro emocional antes (min)</label><input type="number" id="ev-sec-antes" placeholder="Ej. 45"></div>
-          <div class="field"><label class="lbl">Duración del secuestro emocional ahora (min)</label><input type="number" id="ev-sec-ahora" placeholder="Ej. 10"></div>
+          <div class="field"><label class="lbl">Duración secuestro emocional antes (min)</label><input type="number" id="ev-sec-antes" placeholder="Ej. 45"></div>
+          <div class="field"><label class="lbl">Duración secuestro emocional ahora (min)</label><input type="number" id="ev-sec-ahora" placeholder="Ej. 10"></div>
         </div>
         <div class="grid2" style="margin-bottom:14px">
           <div class="field"><label class="lbl">Contención de daño antes</label><input type="text" id="ev-daño-antes" placeholder="Ej. -5R en una tarde"></div>
           <div class="field"><label class="lbl">Contención de daño ahora</label><input type="text" id="ev-daño-ahora" placeholder="Ej. máximo -1.5R"></div>
         </div>
-        <div class="field"><label class="lbl">Ya no tolero</label><textarea id="ev-notolero" rows="2" placeholder="Conductas que antes veías como normales y ahora rechazas..."></textarea></div>
+        <div class="field"><label class="lbl">Ya no tolero</label><textarea id="ev-notolero" rows="2" placeholder="Conductas que antes veías como normales..."></textarea></div>
         <div class="field"><label class="lbl">Herramientas que funcionan</label><textarea id="ev-herramientas" rows="2" placeholder="Protocolos sostenidos con evidencia..."></textarea></div>
-        <div class="field"><label class="lbl">Pendiente — patrones que aún resisten</label><textarea id="ev-pendiente" rows="2" placeholder="Lo que aún no has podido trabajar..."></textarea></div>
+        <div class="field"><label class="lbl">Pendiente</label><textarea id="ev-pendiente" rows="2" placeholder="Patrones que aún resisten..."></textarea></div>
         <div class="field"><label class="lbl">Dirección próxima</label><input type="text" id="ev-direccion" placeholder="Una dirección concreta para el siguiente período"></div>
-        <button class="btn" onclick="saveEvolucion()">Guardar auditoría</button>
+        <button class="btn" id="btn-save-evolucion" onclick="saveEvolucion()">Guardar auditoría</button>
       </div>
     </div>
 
@@ -467,16 +452,16 @@ input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
       <div class="card">
         <div class="section-head">Escáner de creencias — completa sin pensar demasiado</div>
         <div class="field"><label class="lbl">«Cuando pierdo dinero en una operación, soy...»</label><input type="text" id="cr-1" placeholder="Respuesta honesta, sin filtro"></div>
-        <div class="field"><label class="lbl">«Un trader de verdad debería...»</label><input type="text" id="cr-2" placeholder=""></div>
-        <div class="field"><label class="lbl">«Si pierdo tres operaciones seguidas, significa que...»</label><input type="text" id="cr-3" placeholder=""></div>
-        <div class="field"><label class="lbl">«El dinero es...»</label><input type="text" id="cr-4" placeholder=""></div>
-        <div class="field"><label class="lbl">«Quedarme fuera de un movimiento significa...»</label><input type="text" id="cr-5" placeholder=""></div>
+        <div class="field"><label class="lbl">«Un trader de verdad debería...»</label><input type="text" id="cr-2"></div>
+        <div class="field"><label class="lbl">«Si pierdo tres operaciones seguidas, significa que...»</label><input type="text" id="cr-3"></div>
+        <div class="field"><label class="lbl">«El dinero es...»</label><input type="text" id="cr-4"></div>
+        <div class="field"><label class="lbl">«Quedarme fuera de un movimiento significa...»</label><input type="text" id="cr-5"></div>
         <div class="sep"></div>
-        <div class="field"><label class="lbl">Creencia limitante — la que más influye en tu operativa</label><textarea id="cr-limitante" rows="2" placeholder="Formulada con precisión clínica..."></textarea></div>
-        <div class="field"><label class="lbl">Mecanismo — por qué esa creencia hace que el error parezca coherente en el momento</label><textarea id="cr-mecanismo" rows="2" placeholder="No es estupidez — tiene una lógica interna..."></textarea></div>
-        <div class="field"><label class="lbl">Creencia potenciadora — versión funcional y sostenible (no una afirmación vacía)</label><textarea id="cr-potenciadora" rows="2" placeholder="Algo que puedes sostener con honestidad..."></textarea></div>
+        <div class="field"><label class="lbl">Creencia limitante</label><textarea id="cr-limitante" rows="2" placeholder="La que más influye en tu operativa..."></textarea></div>
+        <div class="field"><label class="lbl">Mecanismo — por qué esa creencia hace que el error parezca coherente</label><textarea id="cr-mecanismo" rows="2"></textarea></div>
+        <div class="field"><label class="lbl">Creencia potenciadora — versión funcional y sostenible</label><textarea id="cr-potenciadora" rows="2"></textarea></div>
         <div class="sep"></div>
-        <div class="field"><label class="lbl">Identidad antigua — la sentencia que has estado obedeciendo</label><input type="text" id="cr-antigua" placeholder="Ej. «Soy el tipo que siempre la lía al final»"></div>
+        <div class="field"><label class="lbl">Identidad antigua</label><input type="text" id="cr-antigua" placeholder="Ej. «Soy el tipo que siempre la lía al final»"></div>
         <div class="field"><label class="lbl">Identidad nueva — conductual, sobria, practicable ya</label><input type="text" id="cr-nueva" placeholder="Ej. «Soy un operador que revisa su estado antes de cada sesión»"></div>
         <div class="sep"></div>
         <div class="section-head">Infraestructura de rendimiento</div>
@@ -485,7 +470,7 @@ input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
           <div class="field"><label class="lbl">Estrés externo</label><select id="cr-estres"><option value="">— selecciona —</option><option>Alto</option><option>Medio</option><option>Bajo</option></select></div>
           <div class="field"><label class="lbl">Saturación de pantallas</label><select id="cr-pantallas"><option value="">— selecciona —</option><option>Alta</option><option>Media</option><option>Baja</option></select></div>
         </div>
-        <div style="margin-top:6px"><button class="btn" onclick="saveCreencias()">Guardar identidad</button></div>
+        <button class="btn" id="btn-save-creencias" onclick="saveCreencias()">Guardar identidad</button>
       </div>
     </div>
 
@@ -493,272 +478,358 @@ input[type=range]{width:100%;accent-color:#7ecb9e;cursor:pointer}
 </div>
 
 <script>
-var DB={trades:[],checkins:[],plan:[],emocional:[],patrones:[],protocolos:{antilaidas:[]},evolucion:[],creencias:{}};
-var radioState={};
-var multiState={};
-var chartInstance=null;
+const SUPABASE_URL = 'https://mrkekwesevufhaychslm.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ya2Vrd2VzZXZ1ZmhheWNoc2xtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI2MDQ0OTksImV4cCI6MjA5ODE4MDQ5OX0.UEC9lZxE2Jv1jhERC5cUlaGpbEDRSRshjdw_F6C_WAU';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-function loadDB(){try{var d=localStorage.getItem('tj_v2');if(d)DB=JSON.parse(d);}catch(e){}}
-function saveDB(){try{localStorage.setItem('tj_v2',JSON.stringify(DB));}catch(e){}}
+var radioState = {};
+var multiState = {};
+var chartInstance = null;
+var cachedTrades = [];
+var cachedCheckins = [];
+var cachedPlan = [];
+var cachedPatrones = [];
 
-function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2200);}
-
-function nav(id){
-  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active')});
-  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
-  document.getElementById('page-'+id).classList.add('active');
-  var items=document.querySelectorAll('.nav-item');
-  items.forEach(function(n){if(n.getAttribute('onclick')==="nav('"+id+"')")n.classList.add('active')});
-  if(id==='dashboard')updateDashboard();
-  if(id==='protocolos')loadProtocolos();
-  if(id==='patrones')renderPatrones();
-  if(id==='trades')renderTrades();
-  if(id==='plan')renderPlanHistory();
-  if(id==='creencias')loadCreencias();
+function setSyncStatus(state, msg) {
+  var el = document.getElementById('sync-status');
+  el.textContent = msg;
+  el.className = 'sync-indicator ' + state;
 }
 
-function selectRadio(group,val){
-  var args=Array.prototype.slice.call(arguments,2);
-  radioState[group]=val;
-  args.forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('selected')});
-  if(args.length>0){var el=document.getElementById(args[0]);if(el)el.classList.add('selected');}
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type || '') + ' show';
+  setTimeout(function() { t.classList.remove('show'); }, 2500);
 }
 
-function toggleMulti(el,group){
+function nav(id) {
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(n) {
+    if (n.getAttribute('onclick') === "nav('" + id + "')") n.classList.add('active');
+  });
+  if (id === 'dashboard') updateDashboard();
+  if (id === 'protocolos') loadProtocolos();
+  if (id === 'patrones') renderPatrones();
+  if (id === 'trades') renderTrades();
+  if (id === 'plan') renderPlanHistory();
+  if (id === 'creencias') loadCreencias();
+}
+
+function selectRadio(group, val) {
+  var args = Array.prototype.slice.call(arguments, 2);
+  radioState[group] = val;
+  args.forEach(function(id) { var el = document.getElementById(id); if (el) el.classList.remove('selected'); });
+  if (args.length > 0) { var el = document.getElementById(args[0]); if (el) el.classList.add('selected'); }
+}
+
+function toggleMulti(el, group) {
   el.classList.toggle('selected');
-  if(!multiState[group])multiState[group]=[];
-  var txt=el.textContent.trim();
-  var idx=multiState[group].indexOf(txt);
-  if(idx>-1)multiState[group].splice(idx,1);
+  if (!multiState[group]) multiState[group] = [];
+  var txt = el.textContent.trim();
+  var idx = multiState[group].indexOf(txt);
+  if (idx > -1) multiState[group].splice(idx, 1);
   else multiState[group].push(txt);
 }
 
-function gV(id){var el=document.getElementById(id);return el?el.value.trim():'';}
+function gV(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
-function calcR(){
-  var r=parseFloat(document.getElementById('tr-riesgo').value)||0;
-  var n=parseFloat(document.getElementById('tr-nominal').value)||0;
-  var el=document.getElementById('tr-r-display');
-  if(r>0){
-    var rv=(n/r).toFixed(2);
-    el.textContent=(n>=0?'+':'')+rv+'R';
-    el.style.color=n>=0?'#7ecb9e':'#c96060';
+function setLoading(btnId, loading) {
+  var btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = loading;
+  if (loading) btn.textContent = 'Guardando...';
+}
+
+function resetBtn(btnId, label) {
+  var btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = false;
+  btn.textContent = label;
+}
+
+function calcR() {
+  var r = parseFloat(document.getElementById('tr-riesgo').value) || 0;
+  var n = parseFloat(document.getElementById('tr-nominal').value) || 0;
+  var el = document.getElementById('tr-r-display');
+  if (r > 0) {
+    var rv = (n / r).toFixed(2);
+    el.textContent = (n >= 0 ? '+' : '') + rv + 'R';
+    el.style.color = n >= 0 ? '#7ecb9e' : '#c96060';
   } else {
-    el.textContent='—';
-    el.style.color='#7ecb9e';
+    el.textContent = '—';
+    el.style.color = '#7ecb9e';
   }
 }
 
-function saveTrade(){
-  var r=parseFloat(gV('tr-riesgo'))||0;
-  var n=parseFloat(gV('tr-nominal'))||0;
-  var trade={
-    id:Date.now(),fecha:gV('tr-fecha'),activo:gV('tr-activo'),mercado:gV('tr-mercado'),
-    tipo:radioState['tr-tipo']||'',entrada:gV('tr-entrada'),salida:gV('tr-salida'),
-    riesgo:r,nominal:n,r:r>0?(n/r):0,
-    tecnico:gV('tr-tecnico'),sintoma:radioState['ts']||'',
-    tag:gV('tr-tag'),tilt:gV('tr-tilt'),umbral:radioState['umbral']||'',
-    notas:gV('tr-notas')
+async function saveTrade() {
+  setLoading('btn-save-trade', true);
+  var r = parseFloat(gV('tr-riesgo')) || 0;
+  var n = parseFloat(gV('tr-nominal')) || 0;
+  var data = {
+    fecha: gV('tr-fecha'), activo: gV('tr-activo'), mercado: gV('tr-mercado'),
+    tipo: radioState['tr-tipo'] || '', entrada: gV('tr-entrada'), salida: gV('tr-salida'),
+    riesgo: r, nominal: n, r: r > 0 ? (n / r) : 0,
+    tecnico: gV('tr-tecnico'), sintoma: radioState['ts'] || '',
+    tag: gV('tr-tag'), tilt: gV('tr-tilt'), umbral: radioState['umbral'] || '',
+    notas: gV('tr-notas'), ts: Date.now()
   };
-  DB.trades.unshift(trade);saveDB();renderTrades();
-  ['tr-activo','tr-entrada','tr-salida','tr-riesgo','tr-nominal','tr-notas'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('tr-r-display').textContent='—';
-  document.getElementById('tr-r-display').style.color='#7ecb9e';
-  radioState['tr-tipo']=radioState['ts']=radioState['umbral']='';
-  ['tr-buy','tr-sell','ts-pos','ts-mat','ts-neg','umb-si','umb-no'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('selected')});
-  document.querySelectorAll('#page-trades input[type=checkbox]').forEach(function(el){el.checked=false});
-  showToast('Trade guardado ✓');
-}
-
-function renderTrades(){
-  var tbody=document.getElementById('trades-list');
-  if(!DB.trades.length){tbody.innerHTML='<tr><td colspan="8" class="empty-state">Sin trades registrados</td></tr>';return;}
-  tbody.innerHTML=DB.trades.slice(0,30).map(function(t){
-    var rval=(t.r>=0?'+':'')+t.r.toFixed(2)+'R';
-    var rcol=t.r>=0?'#7ecb9e':'#c96060';
-    var bClass=t.tecnico==='TP'?'tp':t.tecnico==='SL'?'sl':t.tecnico==='BE'?'be':'nop';
-    var scol=t.sintoma==='pos'?'#7ecb9e':t.sintoma==='neg'?'#c96060':'#c8973a';
-    return '<tr><td>'+t.fecha+'</td><td style="color:#d0d0d0;font-weight:500">'+t.activo+'</td><td style="color:'+(t.tipo==='buy'?'#7ecb9e':'#c96060')+'">'+t.tipo.toUpperCase()+'</td><td><span class="badge '+bClass+'">'+t.tecnico+'</span></td><td style="color:'+rcol+';font-weight:600">'+rval+'</td><td>'+t.tag+'</td><td style="font-size:11px">'+t.tilt.replace('Tilt de ','')+'</td><td style="color:'+scol+'">'+t.sintoma+'</td></tr>';
-  }).join('');
-}
-
-function saveCheckin(){
-  var ci={
-    id:Date.now(),fecha:gV('ci-fecha'),presencia:document.getElementById('ci-presencia').value,
-    carga:multiState['carga']||[],emocion:gV('ci-emocion'),necesidad:gV('ci-necesidad'),
-    narrativa:gV('ci-narrativa'),ancla:gV('ci-ancla'),sombra:gV('ci-sombra'),compromiso:gV('ci-compromiso'),
-    siguioPlan:radioState['ci-plan']||'',rompioNorma:radioState['ci-norma']||'',
-    riesgoCumplido:radioState['ci-riesgo']||'',resultado:gV('ci-resultado'),
-    sintoma:radioState['ci-sintoma']||''
-  };
-  DB.checkins.unshift(ci);saveDB();showToast('Check-in guardado ✓');
-}
-
-function savePlan(){
-  var plan={id:Date.now(),semana:gV('p-semana'),sesgo:gV('p-sesgo'),reglas:gV('p-reglas'),reto:gV('p-reto'),marco:gV('p-marco'),compromiso:gV('p-compromiso'),cumplido:radioState['plan-cumplido']||''};
-  DB.plan.unshift(plan);saveDB();renderPlanHistory();showToast('Plan guardado ✓');
-}
-
-function renderPlanHistory(){
-  if(!DB.plan.length)return;
-  document.getElementById('plan-history-card').style.display='block';
-  document.getElementById('plan-history').innerHTML=DB.plan.slice(0,8).map(function(p){
-    return '<div class="history-item"><div class="h-title">'+p.semana+'<span style="margin-left:12px;font-size:12px;color:'+(p.cumplido==='si'?'#7ecb9e':'#555')+'">'+( p.cumplido==='si'?'✓ Cumplido':p.cumplido==='no'?'✗ No cumplido':'Pendiente')+'</span></div><div class="h-sub">'+p.sesgo+'</div></div>';
-  }).join('');
-}
-
-function saveEmocional(){
-  DB.emocional.unshift({id:Date.now(),trigger:gV('de-trigger'),emocion:gV('de-emocion'),impulso:gV('de-impulso'),contexto:gV('de-contexto'),pensamiento:gV('de-pensamiento'),conducta:gV('de-conducta'),palanca:gV('de-palanca'),filtro:radioState['de-filtro']||'',tilt:gV('de-tilt'),vaciado:gV('de-vaciado'),leccion:gV('de-leccion')});
-  saveDB();showToast('Entrada guardada ✓');
-}
-
-function savePatron(){
-  DB.patrones.unshift({id:Date.now(),ptId:gV('pt-id'),trigger:gV('pt-trigger'),emocion:gV('pt-emocion'),impulso:gV('pt-impulso'),premisa:gV('pt-premisa'),vago:gV('pt-vago'),preciso:gV('pt-preciso'),antidoto:gV('pt-antidoto')});
-  saveDB();renderPatrones();showToast('Patrón guardado ✓');
-}
-
-function renderPatrones(){
-  var list=document.getElementById('patrones-list');
-  if(!DB.patrones.length){list.innerHTML='<div class="empty-state">Sin patrones registrados</div>';return;}
-  list.innerHTML=DB.patrones.map(function(p,i){
-    return '<div class="pattern-item"><div class="p-id">'+p.ptId+'<button onclick="deletePatron('+i+')" style="float:right;background:none;border:none;color:#444;cursor:pointer;font-size:12px">✕</button></div><div class="p-trigger">Trigger: '+p.trigger+'</div><div class="p-lang">«'+p.vago+'» → «'+p.preciso+'»</div></div>';
-  }).join('');
-}
-
-function deletePatron(i){DB.patrones.splice(i,1);saveDB();renderPatrones();}
-
-function addAntiliada(){
-  var val=document.getElementById('new-antiliada').value.trim();
-  if(!val)return;
-  if(!DB.protocolos.antilaidas)DB.protocolos.antilaidas=[];
-  DB.protocolos.antilaidas.push(val);
-  document.getElementById('new-antiliada').value='';
-  renderAntilaidas();
-}
-
-function renderAntilaidas(){
-  var list=document.getElementById('antilaidas-list');
-  if(!DB.protocolos.antilaidas||!DB.protocolos.antilaidas.length){list.innerHTML='';return;}
-  list.innerHTML=DB.protocolos.antilaidas.map(function(a,i){
-    return '<div class="checklist-item"><span style="flex:1">'+a+'</span><span onclick="removeAntiliada('+i+')" style="cursor:pointer;color:#444;font-size:18px;line-height:1">×</span></div>';
-  }).join('');
-}
-
-function removeAntiliada(i){DB.protocolos.antilaidas.splice(i,1);renderAntilaidas();}
-
-function loadProtocolos(){
-  var p=DB.protocolos;
-  ['vuelo','stop','noop','restauracion','cierre'].forEach(function(k){var el=document.getElementById('pr-'+k);if(el&&p[k])el.value=p[k];});
-  renderAntilaidas();
-}
-
-function saveProtocolos(){
-  ['vuelo','stop','noop','restauracion','cierre'].forEach(function(k){DB.protocolos[k]=gV('pr-'+k);});
-  saveDB();showToast('Protocolos guardados ✓');
-}
-
-function saveEvolucion(){
-  DB.evolucion.unshift({id:Date.now(),mes:gV('ev-mes'),cgameAntes:gV('ev-cgame-antes'),cgameAhora:gV('ev-cgame-ahora'),secAntes:gV('ev-sec-antes'),secAhora:gV('ev-sec-ahora'),dañoAntes:gV('ev-daño-antes'),dañoAhora:gV('ev-daño-ahora'),noTolero:gV('ev-notolero'),herramientas:gV('ev-herramientas'),pendiente:gV('ev-pendiente'),direccion:gV('ev-direccion')});
-  saveDB();showToast('Auditoría guardada ✓');
-}
-
-function loadCreencias(){
-  var c=DB.creencias;
-  ['1','2','3','4','5'].forEach(function(k){var el=document.getElementById('cr-'+k);if(el&&c['cr'+k])el.value=c['cr'+k];});
-  ['limitante','mecanismo','potenciadora','antigua','nueva','sueño','estres','pantallas'].forEach(function(k){var el=document.getElementById('cr-'+k);if(el&&c[k])el.value=c[k];});
-}
-
-function saveCreencias(){
-  var c={};
-  ['1','2','3','4','5'].forEach(function(k){c['cr'+k]=gV('cr-'+k);});
-  ['limitante','mecanismo','potenciadora','antigua','nueva','sueño','estres','pantallas'].forEach(function(k){c[k]=gV('cr-'+k);});
-  DB.creencias=c;saveDB();showToast('Identidad guardada ✓');
-}
-
-function updateDashboard(){
-  var trades=DB.trades;
-  var checkins=DB.checkins;
-  var ci=checkins.length;
-  document.getElementById('d-checkins').textContent=ci;
-  if(ci>0){
-    var plan=checkins.filter(function(c){return c.siguioPlan==='si'}).length;
-    var normas=checkins.filter(function(c){return c.rompioNorma==='no'}).length;
-    var riesgo=checkins.filter(function(c){return c.riesgoCumplido==='si'}).length;
-    document.getElementById('d-plan').textContent=Math.round(plan/ci*100)+'%';
-    document.getElementById('d-normas').textContent=Math.round(normas/ci*100)+'%';
-    document.getElementById('d-riesgo').textContent=Math.round(riesgo/ci*100)+'%';
+  var result = await sb.from('trades').insert({ data: data });
+  if (result.error) { showToast('Error al guardar', 'error'); }
+  else {
+    showToast('Trade guardado ✓');
+    ['tr-activo','tr-entrada','tr-salida','tr-riesgo','tr-nominal','tr-notas'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+    document.getElementById('tr-r-display').textContent = '—';
+    document.getElementById('tr-r-display').style.color = '#7ecb9e';
+    radioState['tr-tipo'] = radioState['ts'] = radioState['umbral'] = '';
+    ['tr-buy','tr-sell','ts-pos','ts-mat','ts-neg','umb-si','umb-no'].forEach(function(id) { var el = document.getElementById(id); if (el) el.classList.remove('selected'); });
+    document.querySelectorAll('#page-trades input[type=checkbox]').forEach(function(el) { el.checked = false; });
+    await loadTrades();
+    renderTrades();
   }
-  var t=trades.filter(function(x){return x.tecnico&&x.tecnico!=='No operé'});
-  var tp=trades.filter(function(x){return x.tecnico==='TP'}).length;
-  var sl=trades.filter(function(x){return x.tecnico==='SL'}).length;
-  var be=trades.filter(function(x){return x.tecnico==='BE'}).length;
-  var nop=trades.filter(function(x){return x.tecnico==='No operé'}).length;
-  var pnlR=trades.reduce(function(s,x){return s+x.r},0);
-  var pel=document.getElementById('d-pnlr');
-  pel.textContent=(pnlR>=0?'+':'')+pnlR.toFixed(2)+'R';
-  pel.className='metric-val '+(pnlR>=0?'green':'red');
-  document.getElementById('d-results').innerHTML='<span class="tag pos">'+tp+' TP</span><span class="tag neg">'+sl+' SL</span><span class="tag neu">'+be+' BE</span><span class="tag">'+nop+' No operé</span>';
-  var spos=trades.filter(function(x){return x.sintoma==='pos'}).length;
-  var smat=trades.filter(function(x){return x.sintoma==='mat'}).length;
-  var sneg=trades.filter(function(x){return x.sintoma==='neg'}).length;
-  document.getElementById('d-sintomas').innerHTML='<span class="tag pos">'+spos+' Positivos</span><span class="tag neu">'+smat+' Matiz</span><span class="tag neg">'+sneg+' Negativos</span>';
-  if(t.length>0){
-    var wins=t.filter(function(x){return x.r>0}).length;
-    var wr=wins/t.length;
-    document.getElementById('d-wr').textContent=Math.round(wr*100)+'%';
-    var gW=t.filter(function(x){return x.r>0});
-    var lW=t.filter(function(x){return x.r<0});
-    var avgW=gW.length>0?gW.reduce(function(s,x){return s+x.r},0)/gW.length:0;
-    var avgL=lW.length>0?Math.abs(lW.reduce(function(s,x){return s+x.r},0)/lW.length):0;
-    var gProfit=gW.reduce(function(s,x){return s+x.r},0);
-    var lProfit=Math.abs(lW.reduce(function(s,x){return s+x.r},0));
-    document.getElementById('d-pf').textContent=lProfit>0?(gProfit/lProfit).toFixed(2):'∞';
-    document.getElementById('d-exp').textContent=((wr*avgW)-((1-wr)*avgL)).toFixed(2)+'R';
-    if(t.length>=5){
-      var lines=[];
-      var fomoT=t.filter(function(x){return x.tag==='FOMO'});
-      if(fomoT.length>0){var fa=fomoT.reduce(function(s,x){return s+x.r},0)/fomoT.length;lines.push('FOMO: '+fomoT.length+' trades, resultado medio '+(fa>=0?'+':'')+fa.toFixed(2)+'R');}
-      var revT=t.filter(function(x){return x.tag==='Revancha'});
-      if(revT.length>0){var ra=revT.reduce(function(s,x){return s+x.r},0)/revT.length;lines.push('Revancha: '+revT.length+' trades, resultado medio '+(ra>=0?'+':'')+ra.toFixed(2)+'R');}
-      var tiltT=t.filter(function(x){return x.tilt&&x.tilt!=='Ninguno'&&x.tilt!==''});
-      if(tiltT.length>0)lines.push('Tilt activo en '+Math.round(tiltT.length/t.length*100)+'% de las sesiones');
-      document.getElementById('d-detector').innerHTML=lines.length?lines.map(function(l){return '<div style="margin-bottom:5px;color:#666">· '+l+'</div>'}).join(''):'Sin correlaciones detectables todavía.';
+  resetBtn('btn-save-trade', 'Registrar trade');
+}
+
+async function loadTrades() {
+  var result = await sb.from('trades').select('*').order('created_at', { ascending: false }).limit(100);
+  if (!result.error) cachedTrades = result.data.map(function(r) { return r.data; });
+}
+
+function renderTrades() {
+  var tbody = document.getElementById('trades-list');
+  if (!cachedTrades.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Sin trades registrados</td></tr>'; return; }
+  tbody.innerHTML = cachedTrades.slice(0, 30).map(function(t) {
+    var rval = (t.r >= 0 ? '+' : '') + parseFloat(t.r).toFixed(2) + 'R';
+    var rcol = t.r >= 0 ? '#7ecb9e' : '#c96060';
+    var bClass = t.tecnico === 'TP' ? 'tp' : t.tecnico === 'SL' ? 'sl' : t.tecnico === 'BE' ? 'be' : 'nop';
+    var scol = t.sintoma === 'pos' ? '#7ecb9e' : t.sintoma === 'neg' ? '#c96060' : '#c8973a';
+    return '<tr><td>' + t.fecha + '</td><td style="color:#d0d0d0;font-weight:500">' + t.activo + '</td><td style="color:' + (t.tipo === 'buy' ? '#7ecb9e' : '#c96060') + '">' + t.tipo.toUpperCase() + '</td><td><span class="badge ' + bClass + '">' + t.tecnico + '</span></td><td style="color:' + rcol + ';font-weight:600">' + rval + '</td><td>' + t.tag + '</td><td style="font-size:11px">' + (t.tilt||'').replace('Tilt de ', '') + '</td><td style="color:' + scol + '">' + t.sintoma + '</td></tr>';
+  }).join('');
+}
+
+async function saveCheckin() {
+  setLoading('btn-save-checkin', true);
+  var data = {
+    fecha: gV('ci-fecha'), presencia: document.getElementById('ci-presencia').value,
+    carga: multiState['carga'] || [], emocion: gV('ci-emocion'), necesidad: gV('ci-necesidad'),
+    narrativa: gV('ci-narrativa'), ancla: gV('ci-ancla'), sombra: gV('ci-sombra'), compromiso: gV('ci-compromiso'),
+    siguioPlan: radioState['ci-plan'] || '', rompioNorma: radioState['ci-norma'] || '',
+    riesgoCumplido: radioState['ci-riesgo'] || '', resultado: gV('ci-resultado'),
+    sintoma: radioState['ci-sintoma'] || '', ts: Date.now()
+  };
+  var result = await sb.from('checkins').insert({ data: data });
+  if (result.error) showToast('Error al guardar', 'error');
+  else { showToast('Check-in guardado ✓'); await loadCheckins(); }
+  resetBtn('btn-save-checkin', 'Guardar check-in');
+}
+
+async function loadCheckins() {
+  var result = await sb.from('checkins').select('*').order('created_at', { ascending: false }).limit(100);
+  if (!result.error) cachedCheckins = result.data.map(function(r) { return r.data; });
+}
+
+async function savePlan() {
+  setLoading('btn-save-plan', true);
+  var data = { semana: gV('p-semana'), sesgo: gV('p-sesgo'), reglas: gV('p-reglas'), reto: gV('p-reto'), marco: gV('p-marco'), compromiso: gV('p-compromiso'), cumplido: radioState['plan-cumplido'] || '', ts: Date.now() };
+  var result = await sb.from('plan').insert({ data: data });
+  if (result.error) showToast('Error al guardar', 'error');
+  else { showToast('Plan guardado ✓'); await loadPlan(); renderPlanHistory(); }
+  resetBtn('btn-save-plan', 'Guardar semana');
+}
+
+async function loadPlan() {
+  var result = await sb.from('plan').select('*').order('created_at', { ascending: false }).limit(20);
+  if (!result.error) cachedPlan = result.data.map(function(r) { return r.data; });
+}
+
+function renderPlanHistory() {
+  if (!cachedPlan.length) return;
+  document.getElementById('plan-history-card').style.display = 'block';
+  document.getElementById('plan-history').innerHTML = cachedPlan.slice(0, 8).map(function(p) {
+    return '<div class="history-item"><div class="h-title">' + p.semana + '<span style="margin-left:12px;font-size:12px;color:' + (p.cumplido === 'si' ? '#7ecb9e' : '#555') + '">' + (p.cumplido === 'si' ? '✓ Cumplido' : p.cumplido === 'no' ? '✗ No cumplido' : 'Pendiente') + '</span></div><div class="h-sub">' + p.sesgo + '</div></div>';
+  }).join('');
+}
+
+async function saveEmocional() {
+  setLoading('btn-save-emocional', true);
+  var data = { trigger: gV('de-trigger'), emocion: gV('de-emocion'), impulso: gV('de-impulso'), contexto: gV('de-contexto'), pensamiento: gV('de-pensamiento'), conducta: gV('de-conducta'), palanca: gV('de-palanca'), filtro: radioState['de-filtro'] || '', tilt: gV('de-tilt'), vaciado: gV('de-vaciado'), leccion: gV('de-leccion'), ts: Date.now() };
+  var result = await sb.from('emocional').insert({ data: data });
+  if (result.error) showToast('Error al guardar', 'error');
+  else showToast('Entrada guardada ✓');
+  resetBtn('btn-save-emocional', 'Guardar entrada');
+}
+
+async function savePatron() {
+  setLoading('btn-save-patron', true);
+  var data = { ptId: gV('pt-id'), trigger: gV('pt-trigger'), emocion: gV('pt-emocion'), impulso: gV('pt-impulso'), premisa: gV('pt-premisa'), vago: gV('pt-vago'), preciso: gV('pt-preciso'), antidoto: gV('pt-antidoto'), ts: Date.now() };
+  var result = await sb.from('patrones').insert({ data: data });
+  if (result.error) showToast('Error al guardar', 'error');
+  else { showToast('Patrón guardado ✓'); await loadPatrones(); renderPatrones(); }
+  resetBtn('btn-save-patron', 'Guardar patrón');
+}
+
+async function loadPatrones() {
+  var result = await sb.from('patrones').select('*').order('created_at', { ascending: false }).limit(50);
+  if (!result.error) cachedPatrones = result.data.map(function(r) { return r.data; });
+}
+
+function renderPatrones() {
+  var list = document.getElementById('patrones-list');
+  if (!cachedPatrones.length) { list.innerHTML = '<div class="empty-state">Sin patrones registrados</div>'; return; }
+  list.innerHTML = cachedPatrones.map(function(p) {
+    return '<div class="pattern-item"><div class="p-id">' + p.ptId + '</div><div class="p-trigger">Trigger: ' + p.trigger + '</div><div class="p-lang">«' + p.vago + '» → «' + p.preciso + '»</div></div>';
+  }).join('');
+}
+
+async function loadProtocolos() {
+  var result = await sb.from('protocolos').select('*').order('created_at', { ascending: false }).limit(1);
+  if (!result.error && result.data.length) {
+    var p = result.data[0].data;
+    ['vuelo','stop','noop','restauracion','cierre'].forEach(function(k) { var el = document.getElementById('pr-' + k); if (el && p[k]) el.value = p[k]; });
+    if (p.antilaidas) renderAntilaidas(p.antilaidas);
+  }
+}
+
+function renderAntilaidas(list) {
+  var items = list || [];
+  var container = document.getElementById('antilaidas-list');
+  if (!items.length) { container.innerHTML = ''; return; }
+  container.innerHTML = items.map(function(a, i) {
+    return '<div class="checklist-item"><span style="flex:1">' + a + '</span></div>';
+  }).join('');
+}
+
+function addAntiliada() {
+  var val = document.getElementById('new-antiliada').value.trim();
+  if (!val) return;
+  var container = document.getElementById('antilaidas-list');
+  var existing = Array.from(container.querySelectorAll('.checklist-item span:first-child')).map(function(s) { return s.textContent; });
+  existing.push(val);
+  document.getElementById('new-antiliada').value = '';
+  renderAntilaidas(existing);
+}
+
+async function saveProtocolos() {
+  setLoading('btn-save-protocolos', true);
+  var antilaidas = Array.from(document.getElementById('antilaidas-list').querySelectorAll('.checklist-item span:first-child')).map(function(s) { return s.textContent; });
+  var data = { vuelo: gV('pr-vuelo'), stop: gV('pr-stop'), noop: gV('pr-noop'), restauracion: gV('pr-restauracion'), cierre: gV('pr-cierre'), antilaidas: antilaidas, ts: Date.now() };
+  var result = await sb.from('protocolos').insert({ data: data });
+  if (result.error) showToast('Error al guardar', 'error');
+  else showToast('Protocolos guardados ✓');
+  resetBtn('btn-save-protocolos', 'Guardar protocolos');
+}
+
+async function saveEvolucion() {
+  setLoading('btn-save-evolucion', true);
+  var data = { mes: gV('ev-mes'), cgameAntes: gV('ev-cgame-antes'), cgameAhora: gV('ev-cgame-ahora'), secAntes: gV('ev-sec-antes'), secAhora: gV('ev-sec-ahora'), dañoAntes: gV('ev-daño-antes'), dañoAhora: gV('ev-daño-ahora'), noTolero: gV('ev-notolero'), herramientas: gV('ev-herramientas'), pendiente: gV('ev-pendiente'), direccion: gV('ev-direccion'), ts: Date.now() };
+  var result = await sb.from('evolucion').insert({ data: data });
+  if (result.error) showToast('Error al guardar', 'error');
+  else showToast('Auditoría guardada ✓');
+  resetBtn('btn-save-evolucion', 'Guardar auditoría');
+}
+
+async function loadCreencias() {
+  var result = await sb.from('creencias').select('*').order('created_at', { ascending: false }).limit(1);
+  if (!result.error && result.data.length) {
+    var c = result.data[0].data;
+    ['1','2','3','4','5'].forEach(function(k) { var el = document.getElementById('cr-' + k); if (el && c['cr' + k]) el.value = c['cr' + k]; });
+    ['limitante','mecanismo','potenciadora','antigua','nueva','sueño','estres','pantallas'].forEach(function(k) { var el = document.getElementById('cr-' + k); if (el && c[k]) el.value = c[k]; });
+  }
+}
+
+async function saveCreencias() {
+  setLoading('btn-save-creencias', true);
+  var c = {};
+  ['1','2','3','4','5'].forEach(function(k) { c['cr' + k] = gV('cr-' + k); });
+  ['limitante','mecanismo','potenciadora','antigua','nueva','sueño','estres','pantallas'].forEach(function(k) { c[k] = gV('cr-' + k); });
+  c.ts = Date.now();
+  var result = await sb.from('creencias').insert({ data: c });
+  if (result.error) showToast('Error al guardar', 'error');
+  else showToast('Identidad guardada ✓');
+  resetBtn('btn-save-creencias', 'Guardar identidad');
+}
+
+function updateDashboard() {
+  var trades = cachedTrades;
+  var checkins = cachedCheckins;
+  var ci = checkins.length;
+  document.getElementById('d-checkins').textContent = ci;
+  if (ci > 0) {
+    var plan = checkins.filter(function(c) { return c.siguioPlan === 'si'; }).length;
+    var normas = checkins.filter(function(c) { return c.rompioNorma === 'no'; }).length;
+    var riesgo = checkins.filter(function(c) { return c.riesgoCumplido === 'si'; }).length;
+    document.getElementById('d-plan').textContent = Math.round(plan / ci * 100) + '%';
+    document.getElementById('d-normas').textContent = Math.round(normas / ci * 100) + '%';
+    document.getElementById('d-riesgo').textContent = Math.round(riesgo / ci * 100) + '%';
+  }
+  var t = trades.filter(function(x) { return x.tecnico && x.tecnico !== 'No operé'; });
+  var tp = trades.filter(function(x) { return x.tecnico === 'TP'; }).length;
+  var sl = trades.filter(function(x) { return x.tecnico === 'SL'; }).length;
+  var be = trades.filter(function(x) { return x.tecnico === 'BE'; }).length;
+  var nop = trades.filter(function(x) { return x.tecnico === 'No operé'; }).length;
+  var pnlR = trades.reduce(function(s, x) { return s + (parseFloat(x.r) || 0); }, 0);
+  var pel = document.getElementById('d-pnlr');
+  pel.textContent = (pnlR >= 0 ? '+' : '') + pnlR.toFixed(2) + 'R';
+  pel.className = 'metric-val ' + (pnlR >= 0 ? 'green' : 'red');
+  document.getElementById('d-results').innerHTML = '<span class="tag pos">' + tp + ' TP</span><span class="tag neg">' + sl + ' SL</span><span class="tag neu">' + be + ' BE</span><span class="tag">' + nop + ' No operé</span>';
+  var spos = trades.filter(function(x) { return x.sintoma === 'pos'; }).length;
+  var smat = trades.filter(function(x) { return x.sintoma === 'mat'; }).length;
+  var sneg = trades.filter(function(x) { return x.sintoma === 'neg'; }).length;
+  document.getElementById('d-sintomas').innerHTML = '<span class="tag pos">' + spos + ' Positivos</span><span class="tag neu">' + smat + ' Matiz</span><span class="tag neg">' + sneg + ' Negativos</span>';
+  if (t.length > 0) {
+    var wins = t.filter(function(x) { return x.r > 0; }).length;
+    var wr = wins / t.length;
+    document.getElementById('d-wr').textContent = Math.round(wr * 100) + '%';
+    var gW = t.filter(function(x) { return x.r > 0; });
+    var lW = t.filter(function(x) { return x.r < 0; });
+    var avgW = gW.length > 0 ? gW.reduce(function(s, x) { return s + x.r; }, 0) / gW.length : 0;
+    var avgL = lW.length > 0 ? Math.abs(lW.reduce(function(s, x) { return s + x.r; }, 0) / lW.length) : 0;
+    var gProfit = gW.reduce(function(s, x) { return s + x.r; }, 0);
+    var lProfit = Math.abs(lW.reduce(function(s, x) { return s + x.r; }, 0));
+    document.getElementById('d-pf').textContent = lProfit > 0 ? (gProfit / lProfit).toFixed(2) : '∞';
+    document.getElementById('d-exp').textContent = ((wr * avgW) - ((1 - wr) * avgL)).toFixed(2) + 'R';
+    if (t.length >= 5) {
+      var lines = [];
+      var fomoT = t.filter(function(x) { return x.tag === 'FOMO'; });
+      if (fomoT.length > 0) { var fa = fomoT.reduce(function(s, x) { return s + x.r; }, 0) / fomoT.length; lines.push('FOMO: ' + fomoT.length + ' trades, resultado medio ' + (fa >= 0 ? '+' : '') + fa.toFixed(2) + 'R'); }
+      var revT = t.filter(function(x) { return x.tag === 'Revancha'; });
+      if (revT.length > 0) { var ra = revT.reduce(function(s, x) { return s + x.r; }, 0) / revT.length; lines.push('Revancha: ' + revT.length + ' trades, resultado medio ' + (ra >= 0 ? '+' : '') + ra.toFixed(2) + 'R'); }
+      var tiltT = t.filter(function(x) { return x.tilt && x.tilt !== 'Ninguno' && x.tilt !== ''; });
+      if (tiltT.length > 0) lines.push('Tilt activo en ' + Math.round(tiltT.length / t.length * 100) + '% de las sesiones');
+      document.getElementById('d-detector').innerHTML = lines.length ? lines.map(function(l) { return '<div style="margin-bottom:5px;color:#666">· ' + l + '</div>'; }).join('') : 'Sin correlaciones detectables todavía.';
     }
   }
   renderEquityChart(trades);
 }
 
-function renderEquityChart(trades){
-  var ctx=document.getElementById('equity-chart');
-  if(!ctx)return;
-  if(chartInstance){chartInstance.destroy();chartInstance=null;}
-  var sorted=[].concat(trades).reverse();
-  var labels=['Inicio'];var data=[0];var cum=0;
-  sorted.forEach(function(t,i){cum+=t.r;labels.push(t.fecha||'T'+(i+1));data.push(parseFloat(cum.toFixed(2)));});
-  chartInstance=new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{label:'R',data:data,borderColor:'#7ecb9e',backgroundColor:'rgba(126,203,158,0.06)',borderWidth:1.5,pointRadius:data.length>30?0:2,tension:0.3,fill:true}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return(c.parsed.y>=0?'+':'')+c.parsed.y.toFixed(2)+'R';}}}},scales:{x:{display:false},y:{grid:{color:'#1a1a1a'},ticks:{color:'#444',font:{size:11},callback:function(v){return(v>=0?'+':'')+v+'R';}}}}}});
+function renderEquityChart(trades) {
+  var ctx = document.getElementById('equity-chart');
+  if (!ctx) return;
+  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+  var sorted = [].concat(trades).reverse();
+  var labels = ['Inicio']; var data = [0]; var cum = 0;
+  sorted.forEach(function(t, i) { cum += parseFloat(t.r) || 0; labels.push(t.fecha || 'T' + (i + 1)); data.push(parseFloat(cum.toFixed(2))); });
+  chartInstance = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: 'R', data: data, borderColor: '#7ecb9e', backgroundColor: 'rgba(126,203,158,0.06)', borderWidth: 1.5, pointRadius: data.length > 30 ? 0 : 2, tension: 0.3, fill: true }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { grid: { color: '#1a1a1a' }, ticks: { color: '#444', font: { size: 11 }, callback: function(v) { return (v >= 0 ? '+' : '') + v + 'R'; } } } } } });
 }
 
-function exportData(){
-  var blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
-  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='trading-journal-'+new Date().toISOString().split('T')[0]+'.json';a.click();
-  showToast('Datos exportados ✓');
+async function initApp() {
+  setSyncStatus('syncing', '● Conectando...');
+  var today = new Date().toISOString().split('T')[0];
+  ['ci-fecha', 'tr-fecha'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = today; });
+  try {
+    await Promise.all([loadTrades(), loadCheckins(), loadPlan(), loadPatrones()]);
+    setSyncStatus('synced', '● Sincronizado');
+    updateDashboard();
+    renderPlanHistory();
+  } catch(e) {
+    setSyncStatus('', '● Sin conexión');
+    showToast('Error de conexión', 'error');
+  }
 }
 
-function importData(e){
-  var file=e.target.files[0];if(!file)return;
-  var reader=new FileReader();
-  reader.onload=function(ev){try{DB=JSON.parse(ev.target.result);saveDB();updateDashboard();showToast('Datos importados ✓');}catch(err){alert('Error al importar: archivo JSON inválido');}};
-  reader.readAsText(file);
-  e.target.value='';
-}
-
-window.addEventListener('load',function(){
-  loadDB();
-  var today=new Date().toISOString().split('T')[0];
-  ['ci-fecha','tr-fecha'].forEach(function(id){var el=document.getElementById(id);if(el)el.value=today;});
-  updateDashboard();
-  renderPlanHistory();
-});
+window.addEventListener('load', initApp);
 </script>
 
 
